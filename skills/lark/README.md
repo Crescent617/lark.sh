@@ -8,7 +8,7 @@
 # 在仓库根目录下执行
 
 # 1. lark 命令上 PATH
-ln -s "$(pwd)/bin/lark.sh" /usr/local/bin/lark   # 或任何 PATH 内目录
+ln -s "$(pwd)/bin/lark.sh" ~/.local/bin/lark   # 或任何 PATH 内且持久的目录
 lark -h                                           # 验证
 
 # 2. skill 接入 agent（symlink 进 skills 目录）
