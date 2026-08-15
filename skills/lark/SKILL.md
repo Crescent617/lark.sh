@@ -1,6 +1,6 @@
 ---
 name: lark
-description: 飞书一站式操作（lark.sh，lark-cli 的 bot-only 封装）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。user-only 操作（消息全文搜索、个人日历/云盘）不在此列，回退原生 lark-cli --as user。
+description: 飞书一站式操作（lark.sh，lark-cli 的 bot-only 封装）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。
 metadata:
   requires:
     bins: ["lark", "lark-cli", "jq"]
@@ -12,7 +12,7 @@ metadata:
 
 ## 规则（先读）
 
-1. **bot-only**：本封装没有 user 身份。消息全文搜索、个人日历/云盘等 user-only 场景用原生 `lark-cli --as user`。
+1. **bot-only**：本封装没有 user 身份。
 2. **当前会话不要重复发**：agent 的回复文本会自动落到当前 chat/thread；只有跨 chat、私信、sticker 才用 `lark im send/sticker`。
 3. **高危门禁**：删文件等操作 lark-cli 会 exit 10 要确认——先向用户确认，同意后在原命令末尾补 `--yes` 重跑，绝不静默加。
 4. **判成功用 `ok == true`**（或退出码 0），不要用 `code == 0`。
@@ -65,7 +65,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.conten
 | `references/sheets.md` | 电子表格三件套、+shortcut 透传速查、bot 权限坑 |
 | `references/docs.md` | 文档 block 编辑、with-ids、批量 batch_update |
 | `references/drive-wiki-base.md` | 云盘权限/删除、知识库节点、多维表格查询 |
-| `references/contact-calendar.md` | 查人（含批量搜的 user-only 回退）、忙闲 |
+| `references/contact-calendar.md` | 查人、忙闲 |
 | `references/api.md` | raw api 打法与实测可用的路径食谱 |
 | `references/stickers.md` | **sticker 收藏夹索引表**（file_key → 内容/场景）；本机文件，可能不存在——见下方 sticker 规则 |
 

@@ -27,7 +27,7 @@ follow im.md
 
 ## 边界
 
-只支持 bot 身份；消息全文搜索、个人日历/云盘等 user-only 操作回退原生 `lark-cli --as user`（lark-shared 的认证/授权/门禁规则仍然适用）。
+只支持 bot 身份。
 
 ## 隐私说明
 
