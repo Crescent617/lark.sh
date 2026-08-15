@@ -5,7 +5,7 @@
 ## 三件套（覆盖 80% 场景）
 
 ```bash
-lark sheet create '标题'                                    # 新建，返回 token/url
+lark sheet create '标题'                                    # 新建，返回 token/url；**建完自动订阅**（同 doc）
 lark sheet +info --url <url>                                # 列工作表（拿 sheet 名/id）
 lark sheet read --url <url> --sheet-name 'Sheet1'           # 必读参数：--sheet-name 或 --sheet-id
 lark sheet read --url <url> --sheet-name 'Sheet1' --range A1:F30

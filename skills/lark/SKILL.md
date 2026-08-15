@@ -36,12 +36,12 @@ lark im find '关键词' # 按名搜群
 
 # 文档
 lark doc read <url|token> # 读文档；-k '词' 只取相关片段
-lark doc create '<h1>标题</h1><p>正文</p>' # 新建文档（HTML 片段）
+lark doc create '<h1>标题</h1><p>正文</p>' # 新建文档（HTML 片段；自动订阅）
 lark doc append <doc> @body.html # 文末追加
 lark doc replace <doc> <block_id> '<p>新</p>' # 替换指定块
 
 # 表格
-lark sheet create '标题' # 新建表格（归 bot，记得 share 给人）
+lark sheet create '标题' # 新建表格（归 bot，记得 share；自动订阅）
 lark sheet +info --url <url> # 列工作表（拿 sheet 名/id）
 lark sheet read --url <url> --sheet-name Sheet1 --range A1:F30 # 读区域（必带工作表）
 lark sheet write --url <url> --start-cell B2 --csv @data.csv # 写区域（= 当公式）

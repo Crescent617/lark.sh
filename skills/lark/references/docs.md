@@ -16,7 +16,7 @@ lark doc read <token> --detail with-ids   # 输出带 block_id
 ## 写
 
 ```bash
-lark doc create '<h1>标题</h1><p>正文</p>'            # 新建，返回新文档 token
+lark doc create '<h1>标题</h1><p>正文</p>'            # 新建，返回新文档 token；**建完自动订阅**（评论/更新通知回流 bot，失败只在 stderr 警告不拖垮建单）
 lark doc append <doc> '<p>追加一段</p>'               # 文末追加
 lark doc append <doc> @body.html                      # 文件/stdin 喂长文
 lark doc replace <doc> doxcnXXX '<p>新内容</p>'       # 按 block_id 精确替换

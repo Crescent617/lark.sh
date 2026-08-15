@@ -184,7 +184,17 @@ doc)
     create)
       [ $# -ge 1 ] || die "doc create: 缺内容（html、@file 或 -）"
       body="$(load_text "$1")"; shift || true
-      exec lark-cli docs +create --content "$body" --as bot "$@"
+      rc=0; out="$(lark-cli docs +create --content "$body" --as bot "$@")" || rc=$?
+      printf '%s\n' "$out"
+      [ "$rc" -ne 0 ] && exit "$rc"
+      # 建完自动订阅（评论/更新通知回流 bot）；订阅失败不拖垮建单
+      tok="$(printf '%s' "$out" | jq -r '.data.document_id // .data.document.document_id // empty')"
+      if [ -n "$tok" ]; then
+        lark-cli api POST "/open-apis/drive/v1/files/$tok/subscribe" \
+          --params '{"file_type":"docx"}' --as bot >/dev/null 2>&1 \
+          && echo "lark: 已自动订阅 $tok" >&2 \
+          || echo "lark: 警告：自动订阅失败（文档已建好）$tok" >&2
+      fi
       ;;
     append)
       doc="$(need "${1:-}" doc)"; shift
@@ -209,8 +219,18 @@ sheet)
   case "$sub" in
     create)
       title="$(need "${1:-}" title)"; shift
-      exec lark-cli sheets spreadsheets create \
-        --data "$(jq -nc --arg t "$title" '{title:$t}')" --as bot "$@"
+      rc=0; out="$(lark-cli sheets spreadsheets create \
+        --data "$(jq -nc --arg t "$title" '{title:$t}')" --as bot "$@")" || rc=$?
+      printf '%s\n' "$out"
+      [ "$rc" -ne 0 ] && exit "$rc"
+      # 建完自动订阅（同 doc create）
+      tok="$(printf '%s' "$out" | jq -r '.data.spreadsheet.spreadsheet_token // empty')"
+      if [ -n "$tok" ]; then
+        lark-cli api POST "/open-apis/drive/v1/files/$tok/subscribe" \
+          --params '{"file_type":"sheet"}' --as bot >/dev/null 2>&1 \
+          && echo "lark: 已自动订阅 $tok" >&2 \
+          || echo "lark: 警告：自动订阅失败（表格已建好）$tok" >&2
+      fi
       ;;
     read)
       exec lark-cli sheets +csv-get --as bot "$@"
