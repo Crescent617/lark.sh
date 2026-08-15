@@ -24,6 +24,15 @@ lark doc replace <doc> doxcnXXX '<p>新内容</p>'       # 按 block_id 精确�
 
 内容是 HTML-ish 片段（`<p>` `<h1>` `<ul><li>` 等）。返回信封里 `identity` 可核对身份（文档归属 bot）。
 
+**默认权限坑**：bot 新建的文档默认 `link_share_entity=tenant_readable`（**租户内任何人持链可读**）！要"只有 bot 能看"必须显式关：
+
+```bash
+lark api PATCH /open-apis/drive/v1/permissions/<doc>/public \
+  --params '{"type":"docx"}' --data '{"link_share_entity":"closed"}'
+```
+
+密级标签（secure-label）是 user-only API，bot 设不了。
+
 ## shortcut 不够时：block 树 raw api
 
 ```bash
