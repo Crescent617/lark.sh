@@ -22,7 +22,7 @@ follow im.md
 ## 结构
 
 - `SKILL.md`——agent 操作手册：规则、常用命令、sticker 规则（发送时机等）
-- `references/`——agent 按需加载的深度参考（im / docs / drive-wiki-base / contact-calendar / api）
+- `references/`——agent 按需加载的深度参考（im / docs / sheets / drive / contact-calendar / api）
 - `references/stickers.md` + `references/stickers/`——sticker 收藏夹（见下方隐私说明）
 
 ## 边界

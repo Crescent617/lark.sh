@@ -65,7 +65,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.conten
 | `references/im.md` | IM 全命令参数、时间窗读法、sticker 收藏流程 |
 | `references/sheets.md` | 电子表格三件套、+shortcut 透传速查、bot 权限坑 |
 | `references/docs.md` | 文档 block 编辑、with-ids、批量 batch_update |
-| `references/drive-wiki-base.md` | 云盘权限/删除、知识库节点、多维表格查询 |
+| `references/drive.md` | 云盘删除/加协作者 |
 | `references/contact-calendar.md` | 查人、忙闲 |
 | `references/api.md` | raw api 打法与实测可用的路径食谱 |
 | `references/stickers.md` | **sticker 收藏夹索引表**（file_key → 内容/场景）；本机文件，可能不存在——见下方 sticker 规则 |

@@ -61,13 +61,9 @@ CONTACT/CAL:
   lark contact get <ou_>                   open_id 查人
   lark cal freebusy <ou_> <start> <end>    查忙闲（RFC3339）
 
-DRIVE/WIKI/BASE:
+DRIVE:
   lark drive rm <token> <type> [--yes]     删文件（高危门禁，确认后补 --yes）
   lark drive share <token> [args...]       加协作者（透传 +member-add）
-  lark wiki nodes <space_id> [parent]      列知识库节点
-  lark wiki new <space_id> <parent> <title>  新建 docx 节点
-  lark base tables <base_token>            列出数据表
-  lark base query <base_token> <table_id> [keyword]  查记录（其余参数透传）
 
 逃生舱口:
   lark api <METHOD> <path> [args...]       透传 lark-cli api（自动 --as bot），如 --params/--data/--jq
@@ -257,43 +253,6 @@ drive)
   esac
   ;;
 
-wiki)
-  [ $# -ge 1 ] || die "wiki: 缺子命令（nodes/new）"
-  sub="$1"; shift
-  case "$sub" in
-    nodes)
-      space="$(need "${1:-}" space_id)"; shift
-      extra=()
-      if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then extra=(--parent-node-token "$1"); shift; fi
-      exec lark-cli wiki +node-list --space-id "$space" --as bot "${extra[@]}" "$@"
-      ;;
-    new)
-      space="$(need "${1:-}" space_id)"; parent="$(need "${2:-}" parent_node_token)"; title="$(need "${3:-}" title)"; shift 3
-      exec lark-cli wiki +node-create --space-id "$space" --parent-node-token "$parent" \
-        --obj-type docx --title "$title" --as bot "$@"
-      ;;
-    *) die "wiki: 未知子命令 $sub" ;;
-  esac
-  ;;
-
-base)
-  [ $# -ge 1 ] || die "base: 缺子命令（tables/query）"
-  sub="$1"; shift
-  case "$sub" in
-    tables)
-      tok="$(need "${1:-}" base_token)"; shift
-      exec lark-cli base +table-list --base-token "$tok" --as bot "$@"
-      ;;
-    query)
-      tok="$(need "${1:-}" base_token)"; table="$(need "${2:-}" table_id)"; shift 2
-      extra=()
-      if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then extra=(--keyword "$1"); shift; fi
-      exec lark-cli base +record-search --base-token "$tok" --table-id "$table" --as bot "${extra[@]}" "$@"
-      ;;
-    *) die "base: 未知子命令 $sub" ;;
-  esac
-  ;;
-
 api)
   method="$(need "${1:-}" METHOD)"; path="$(need "${2:-}" path)"; shift 2
   exec lark-cli api "$method" "$path" --as bot "$@"
@@ -304,6 +263,6 @@ api)
   ;;
 
 *)
-  die "未知分类：${category}（im/doc/sheet/contact/cal/drive/wiki/base/api，-h 看帮助）"
+  die "未知分类：${category}（im/doc/sheet/contact/cal/drive/api，-h 看帮助）"
   ;;
 esac
