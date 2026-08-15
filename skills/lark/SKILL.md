@@ -22,35 +22,35 @@ metadata:
 
 ```bash
 # IM
-lark im read <oc_> -n 20                  # 读群消息：最新的在前；--asc 改成最老的在前
-lark im read <oc_> -n 50 --page-token '<tok>'  # 翻下一页：tok 抄上一页返回里的 data.page_token（data.has_more=true 就是还有）
-lark im thread <omt_> -n 20               # 读话题里的消息，同上
-lark im send <oc_> '文本'                  # 发群消息；把 oc_ 换成 ou_ 就是发私信；长文用 @文件 或 -（stdin）
-lark im send <oc_> --markdown '**粗体**'   # 发 markdown
-lark im send <oc_> '<at user_id=ou_x>名字</at> 看下'  # @人
-lark im reply <om_> '文本'                 # 回复某条消息；加 --thread 回复进话题
-lark im sticker <om_> <file_key>          # 用表情回复（自动进话题）；换成 oc_ 就是直接发群。file_key 查 references/stickers.md
-lark im dl <om_> ./dir                    # 把消息里的图片/附件下载到目录
-lark im members <oc_>                     # 列群成员
-lark im find '关键词'                      # 按名字搜群
+lark im read <oc_> -n 20 # 读群消息，最新在前；--asc 最老在前
+lark im read <oc_> --page-token '<tok>' # 翻页：带上上页的 page_token
+lark im thread <omt_> -n 20 # 读话题消息
+lark im send <oc_> '文本' # 发群消息；换 ou_ 发私信
+lark im send <oc_> --markdown '**粗体**' # 发 markdown
+lark im send <oc_> '<at user_id=ou_x>名字</at> 看下' # @人
+lark im reply <om_> '文本' # 回复；--thread 进话题
+lark im sticker <om_> <file_key> # 表情回复；换 oc_ 直发群
+lark im dl <om_> ./dir # 下载消息附件
+lark im members <oc_> # 列群成员
+lark im find '关键词' # 按名搜群
 
 # 文档
-lark doc read <url|token>                 # 读整篇文档；加 -k '关键词' 只取相关片段（大文档省 token）
-lark doc create '<h1>标题</h1><p>正文</p>'  # 新建文档（内容写 HTML 片段）
-lark doc append <doc> @body.html          # 在文末追加
-lark doc replace <doc> <block_id> '<p>新内容</p>'  # 替换指定段落块（block_id 先用 doc read --detail with-ids 拿）
+lark doc read <url|token> # 读文档；-k '词' 只取相关片段
+lark doc create '<h1>标题</h1><p>正文</p>' # 新建文档（HTML 片段）
+lark doc append <doc> @body.html # 文末追加
+lark doc replace <doc> <block_id> '<p>新</p>' # 替换指定块
 
 # 表格
-lark sheet create '标题'                   # 新建电子表格（归 bot 所有，交付前记得 lark drive share 给人）
-lark sheet read --url <url> --range A1:F30  # 读一块区域（CSV 输出）
-lark sheet write --url <url> --csv @data.csv  # 写一块区域（= 开头当公式）；更多操作：lark sheet +<shortcut>
+lark sheet create '标题' # 新建表格（归 bot，记得 share 给人）
+lark sheet read --url <url> --range A1:F30 # 读区域（CSV）
+lark sheet write --url <url> --csv @data.csv # 写区域（= 当公式）
 
 # 人 / 日程
-lark contact get <ou_>                    # 查这个 open_id 是谁
-lark cal freebusy <ou_> <开始> <结束>       # 查某人某段时间的忙闲
+lark contact get <ou_> # 查 open_id 是谁
+lark cal freebusy <ou_> <起> <止> # 查忙闲
 
-# 逃生舱口：封装不够用时直接打飞书 OpenAPI
-lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content'   # 例：取单条消息原文
+# 逃生舱口
+lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content' # 直打 OpenAPI，例：取消息原文
 ```
 
 ## ID 前缀
