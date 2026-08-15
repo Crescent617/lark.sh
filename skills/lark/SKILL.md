@@ -42,8 +42,9 @@ lark doc replace <doc> <block_id> '<p>新</p>' # 替换指定块
 
 # 表格
 lark sheet create '标题' # 新建表格（归 bot，记得 share 给人）
-lark sheet read --url <url> --range A1:F30 # 读区域（CSV）
-lark sheet write --url <url> --csv @data.csv # 写区域（= 当公式）
+lark sheet +info --url <url> # 列工作表（拿 sheet 名/id）
+lark sheet read --url <url> --sheet-name Sheet1 --range A1:F30 # 读区域（必带工作表）
+lark sheet write --url <url> --start-cell B2 --csv @data.csv # 写区域（= 当公式）
 
 # 人 / 日程
 lark contact get <ou_> # 查 open_id 是谁

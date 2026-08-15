@@ -6,11 +6,12 @@
 
 ```bash
 lark sheet create '标题'                                    # 新建，返回 token/url
-lark sheet read --url <url>                                 # 读首个工作表（CSV，行首带 [row=N]）
+lark sheet +info --url <url>                                # 列工作表（拿 sheet 名/id）
+lark sheet read --url <url> --sheet-name 'Sheet1'           # 必读参数：--sheet-name 或 --sheet-id
 lark sheet read --url <url> --sheet-name 'Sheet1' --range A1:F30
 lark sheet write --url <url> --start-cell B2 --csv 'a,b
-c,d'                                                        # 从锚点向右下铺开；= 开头当公式
-lark sheet write --url <url> --csv @data.csv                # @file / - (stdin) 原生支持
+c,d'                                                        # 必带 --start-cell 或 --range；从锚点向右下铺开；= 开头当公式
+lark sheet write --url <url> --start-cell A1 --csv @data.csv # @file / - (stdin) 原生支持
 ```
 
 要点：

@@ -77,7 +77,7 @@ lark im dl om_x ./dl --file-key <key> --type file   # 指定附件；sticker 必
 ```bash
 lark im chats                             # bot 所在群（全量）
 lark im find '群名关键词'                  # 搜群
-lark im members oc_x                      # 成员（全量分页）
+lark im members oc_x                      # 成员（全量分页；结果在 data.users/data.bots，计数在 user_total/bot_total）
 lark im desc oc_x '新群描述'               # 改描述
 ```
 
