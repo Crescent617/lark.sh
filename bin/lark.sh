@@ -65,6 +65,10 @@ DRIVE:
   lark drive rm <token> <type> [--yes]     删文件（高危门禁，确认后补 --yes）
   lark drive share <token> [args...]       加协作者（透传 +member-add）
 
+BOARD:
+  lark board export [args...]              导出画板（--whiteboard-token 必填；--output-type preview|svg|source|raw）
+  lark board update [args...]              更新画板（--whiteboard-token 必填；--source 支持 @file/-；--input_format raw|plantuml|mermaid|svg）
+
 逃生舱口:
   lark api <METHOD> <path> [args...]       透传 lark-cli api（自动 --as bot），如 --params/--data/--jq
 
@@ -273,6 +277,16 @@ drive)
   esac
   ;;
 
+board)
+  sub="$(need "${1:-}" 'export|update')"; shift
+  case "$sub" in
+    export|update)
+      exec lark-cli whiteboard "+$sub" --as bot "$@"
+      ;;
+    *) die "board: 未知子命令 $sub（export/update）" ;;
+  esac
+  ;;
+
 api)
   method="$(need "${1:-}" METHOD)"; path="$(need "${2:-}" path)"; shift 2
   exec lark-cli api "$method" "$path" --as bot "$@"
@@ -283,6 +297,6 @@ api)
   ;;
 
 *)
-  die "未知分类：${category}（im/doc/sheet/contact/cal/drive/api，-h 看帮助）"
+  die "未知分类：${category}（im/doc/sheet/contact/cal/drive/board/api，-h 看帮助）"
   ;;
 esac

@@ -50,6 +50,11 @@ lark sheet write --url <url> --start-cell B2 --csv @data.csv # 写区域（= 当
 lark contact get <ou_> # 查 open_id 是谁
 lark cal freebusy <ou_> <起> <止> # 查忙闲
 
+# 画板
+lark board update --whiteboard-token <tok> --source @a.mmd --input_format mermaid # 更新画板
+lark board export --whiteboard-token <tok> --output-type svg --output b.svg # 导出画板
+# 画板 DSL/场景细节见 lark-cli 自带指南：lark-cli skills read lark-whiteboard
+
 # 逃生舱口
 lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content' # 直打 OpenAPI，例：取消息原文
 ```
