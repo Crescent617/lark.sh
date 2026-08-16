@@ -66,6 +66,7 @@ DRIVE:
   lark drive share <token> [args...]       加协作者（透传 +member-add）
 
 BOARD:
+  lark board create <doc> [--svg] <代码|@file|->   在文档末尾插入画板（默认 mermaid，--svg 切 SVG）
   lark board export [args...]              导出画板（--whiteboard-token 必填；--output-type preview|svg|source|raw）
   lark board update [args...]              更新画板（--whiteboard-token 必填；--source 支持 @file/-；--input_format raw|plantuml|mermaid|svg）
 
@@ -278,12 +279,21 @@ drive)
   ;;
 
 board)
-  sub="$(need "${1:-}" 'export|update')"; shift
+  sub="$(need "${1:-}" 'create|export|update')"; shift
   case "$sub" in
+    create)
+      doc="$(need "${1:-}" doc)"; shift
+      fmt=mermaid
+      if [ "${1:-}" = "--svg" ]; then fmt=svg; shift; fi
+      [ $# -ge 1 ] || die "board create: 缺内容（mermaid/svg 代码、@file 或 -）"
+      code="$(load_text "$1")"; shift || true
+      body="$(printf '<whiteboard type="%s">\n%s\n</whiteboard>' "$fmt" "$code")"
+      exec lark-cli docs +update --doc "$doc" --command append --content "$body" --as bot "$@"
+      ;;
     export|update)
       exec lark-cli whiteboard "+$sub" --as bot "$@"
       ;;
-    *) die "board: 未知子命令 $sub（export/update）" ;;
+    *) die "board: 未知子命令 $sub（create/export/update）" ;;
   esac
   ;;
 

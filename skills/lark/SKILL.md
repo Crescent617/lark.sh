@@ -51,9 +51,9 @@ lark contact get <ou_> # 查 open_id 是谁
 lark cal freebusy <ou_> <起> <止> # 查忙闲
 
 # 画板
+lark board create <doc> 'graph TD;A-->B' # 文末新建画板（mermaid）
 lark board update --whiteboard-token <tok> --source @a.mmd --input_format mermaid # 更新画板
 lark board export --whiteboard-token <tok> --output-type svg --output b.svg # 导出画板
-# 画板 DSL/场景细节见 lark-cli 自带指南：lark-cli skills read lark-whiteboard
 
 # 逃生舱口
 lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content' # 直打 OpenAPI，例：取消息原文
@@ -71,6 +71,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.conten
 | `references/sheets.md` | 电子表格三件套、+shortcut 透传速查、bot 权限坑 |
 | `references/docs.md` | 文档 block 编辑、with-ids、批量 batch_update |
 | `references/drive.md` | 云盘删除/加协作者 |
+| `references/board.md` | 画板创建/更新/导出 |
 | `references/contact-calendar.md` | 查人、忙闲 |
 | `references/api.md` | raw api 打法与实测可用的路径食谱 |
 | `references/stickers.md` | **sticker 收藏夹索引表**（file_key → 内容/场景）；本机文件，可能不存在——见下方 sticker 规则 |
