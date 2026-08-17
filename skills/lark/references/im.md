@@ -19,6 +19,8 @@ lark im read oc_x -n 20 | jq -r '.data.messages[] | "\(.create_time) \(.sender.i
 
 注意与 raw api 的形态差异：`lark api GET /open-apis/im/v1/messages?...` 返回的是 `.data.items[]`、正文在 `.body.content`（字符串化 JSON 需二次解析）、时间戳是毫秒字符串。
 
+卡片消息：正文渲染为 `<card>` 包裹的纯文本 = header 标题 + 顶层 markdown（`collapsible_panel` 折叠面板默认剥离，`--verbose` 保留原文）。对 yomi 运行状态卡意味着：阶段行（`🐾 Typing…` 等标题）可见，实时输出与运行轨迹（trace）不可见。
+
 ## 翻页
 
 返回的 `data.has_more=true` 时说明还有下页，把 `data.page_token` 带回下一页请求（余参透传给 lark-cli）：

@@ -28,8 +28,9 @@ load_text() {
   esac
 }
 
-# 拉一个容器内所有 interactive 卡片的"剥离折叠"正文 map（message_id → 顶层 markdown 拼接）。
-# 折叠组件 collapsible_panel 被剥掉 —— 默认视图不给别人（bot/人）看 yomi trace 之类的折叠内容。
+# 拉一个容器内所有 interactive 卡片的"剥离折叠"正文 map（message_id → header 标题 + 顶层 markdown 拼接）。
+# 折叠组件 collapsible_panel 被剥掉 —— 默认视图不给别人（bot/人）看 yomi trace 之类的折叠内容；
+# header 标题保留：yomi 状态卡的 live 内容全在面板里，标题（🐾 Typing… 等阶段行）是唯一的暂态信号。
 # 用法: card_fold_map <chat|thread> <container_id> <page_size> <order>
 card_fold_map() {
   local ctype="$1" cid="$2" n="$3" order="$4"
@@ -38,8 +39,10 @@ card_fold_map() {
       '{container_id_type:$t, container_id:$c, sort_type:$s, page_size:$n, card_msg_content_type:"user_card_content"}')" \
     --jq '[ .data.items[] | select(.msg_type=="interactive")
             | { (.message_id): ((.body.content | fromjson? // {}) as $b
-                  | ($b.body.elements // $b.elements // [])
-                  | map(select(.tag=="markdown") | .content) | join("\n")) } ]
+                  | ([ ($b.header.title.content // empty) ]
+                     + (($b.body.elements // $b.elements // [])
+                        | map(select(.tag=="markdown") | .content)))
+                  | join("\n")) } ]
           | add // {}'
 }
 
