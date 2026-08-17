@@ -27,7 +27,7 @@ lark im read <oc_> --page-token '<tok>' # 翻页：带上上页的 page_token
 lark im thread <omt_> -n 20 # 读话题消息
 lark im send <oc_> '文本' # 发群消息；换 ou_ 发私信
 lark im send <oc_> --markdown '**粗体**' # 发 markdown
-lark im send <oc_> '<at user_id=ou_x>名字</at> 看下' # @人
+lark im send <oc_> '<at user_id="ou_x">名字</at> 看下' # @人（user_id 必须带引号，否则静默不解析）
 lark im reply <om_> '文本' # 回复；--thread 进话题
 lark im sticker <om_> <file_key> # 表情回复；换 oc_ 直发群
 lark im dl <om_> ./dir # 下载消息附件

@@ -48,7 +48,7 @@ lark im send oc_x @body.md                # 文件内容（wrapper 读文件，�
 lark im send oc_x - <<'EOF'               # stdin
 长文
 EOF
-lark im send oc_x '<at user_id=ou_x>张辉</at> 看下'   # @人
+lark im send oc_x '<at user_id="ou_x">XXX</at> 看下'   # @人（user_id 必须带引号，否则静默不解析：不蓝/不进 mentions/不通知）
 ```
 
 ## 回复 / sticker
