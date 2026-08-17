@@ -60,10 +60,12 @@ lark im send oc_x '<at user_id="ou_x">XXX</at> 看下'   # @人（user_id 必须
 lark im reply om_x '收到'                 # 主消息流回复
 lark im reply om_x '收到' --thread        # 进话题
 lark im reply om_x --markdown '**好**'    # markdown 回复（可叠 --thread，顺序任意）
-lark im sticker om_x <file_key>           # 以 sticker 回复该消息并进话题（最常用）
-lark im sticker om_x <file_key> --main    # 回复但不进话题
+lark im sticker om_x <file_key>           # 以 sticker 回复该消息（默认回主消息流，同 reply）
+lark im sticker om_x <file_key> --thread  # 进话题
 lark im sticker oc_x <file_key>           # 直接发到群
 ```
+
+> 落点语义全命令统一：回复类（reply/sticker 接 `om_`）**默认回主消息流，要进话题加 `--thread`**；`oc_` 直发群无话题概念。
 
 收藏夹 file_key 表见 `stickers.md`（本地文件，可能尚不存在——不存在说明收藏夹为空）；发送时机规则见 `SKILL.md` 的「sticker 规则」。
 

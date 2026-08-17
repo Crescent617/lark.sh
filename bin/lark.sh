@@ -68,7 +68,7 @@ IM:
   lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（折叠同 read）
   lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
   lark im reply <om_> <text|@file|->       回复消息（--thread 进话题；--markdown 富文本；--image/--file 等媒体同 send）
-  lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息进话题，oc_=直发群；--main 回复不进话题）
+  lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息默认回主流，oc_=直发群；--thread 进话题）
   lark im dl <om_> [dir] [--file-key K] [--type file]  下载消息附件/图片
   lark im mget <om_>[,<om_>...]            按 id 批量取消息
   lark im chats                            列出 bot 所在群
@@ -206,8 +206,9 @@ im)
       content="$(jq -nc --arg k "$key" '{file_key:$k}')"
       case "$target" in
         om_*)
-          in_thread=true
-          if [ "${1:-}" = "--main" ]; then in_thread=false; shift; fi
+          # 与 im reply 同一语义：默认回主消息流，--thread 才进话题。
+          in_thread=false
+          if [ "${1:-}" = "--thread" ]; then in_thread=true; shift; fi
           data="$(jq -nc --arg c "$content" --argjson t "$in_thread" \
             '{content:$c,msg_type:"sticker",reply_in_thread:$t}')"
           exec lark-cli api POST "/open-apis/im/v1/messages/$target/reply" --data "$data" --as bot "$@"

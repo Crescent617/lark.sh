@@ -31,7 +31,7 @@ lark im send <oc_> --image ./图.png # 发图片（路径/URL/img_key）
 lark im send <oc_> --file ./报告.pdf # 发文件（路径/URL/file_key；--video/--audio 同理）
 lark im send <oc_> '<at user_id="ou_x">名字</at> 看下' # @人（user_id 必须带引号，否则静默不解析）
 lark im reply <om_> '文本' # 回复；--thread 进话题；--markdown 发富文本
-lark im sticker <om_> <file_key> # 表情回复；换 oc_ 直发群
+lark im sticker <om_> <file_key> # 表情回复（默认回主流，--thread 进话题）；换 oc_ 直发群
 lark im dl <om_> ./dir # 下载消息附件
 lark im members <oc_> # 列群成员
 lark im find '关键词' # 按名搜群
@@ -82,4 +82,4 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 ## sticker 规则
 
 - 收藏夹 = `references/stickers.md` + `stickers/`（本机文件，gitignore 不上传，可能尚不存在）；没有合适的 file_key 就直说没有，**不要编**。收藏流程见 `im.md`。
-- 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个、默认进当前 thread；⚠️ 标记者只对熟人用。
+- 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个；进当前 thread 就显式加 `--thread`（命令默认回主流）；⚠️ 标记者只对熟人用。
