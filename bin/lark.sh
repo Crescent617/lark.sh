@@ -174,11 +174,15 @@ im)
       ;;
     reply)
       mid="$(need "${1:-}" om_)"; shift
-      extra=()
-      if [ "${1:-}" = "--thread" ]; then extra=(--reply-in-thread); shift; fi
+      extra=(); msgtype=text
+      while [ $# -gt 0 ]; do case "$1" in
+        --thread) extra+=(--reply-in-thread); shift ;;
+        --markdown) msgtype=markdown; shift ;;
+        *) break ;;
+      esac; done
       [ $# -ge 1 ] || die "im reply: 缺正文（文本、@file 或 -）"
       body="$(load_text "$1")"; shift || true
-      exec lark-cli im +messages-reply --message-id "$mid" --text "$body" --as bot "${extra[@]}" "$@"
+      exec lark-cli im +messages-reply --message-id "$mid" --"$msgtype" "$body" --as bot "${extra[@]}" "$@"
       ;;
     sticker)
       target="$(need "${1:-}" 'om_|oc_')"; key="$(need "${2:-}" file_key)"; shift 2
