@@ -56,7 +56,7 @@ lark board update --whiteboard-token <tok> --source @a.mmd --input_format mermai
 lark board export --whiteboard-token <tok> --output-type svg --output b.svg # 导出画板
 
 # 逃生舱口
-lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content' # 直打 OpenAPI，例：取消息原文
+lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' | jq -r . # 直打 OpenAPI，例：取消息原文
 ```
 
 ## ID 前缀

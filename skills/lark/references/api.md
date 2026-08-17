@@ -5,8 +5,14 @@
 ## 实测可用的路径食谱
 
 ```bash
-# 取单条消息正文（最常用；body.content 是字符串化 JSON）
-lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content'
+# 取单条消息正文（body.content 是字符串化 JSON，需二次解码；--jq 无 -r，用 jq -r 解字符串）
+lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' | jq -r .
+
+# 取 interactive 卡片正文：默认只回降级占位「请升级至最新版本客户端」。必须带未文档化参数
+# card_msg_content_type=user_card_content（query 走 --params，拼 URL 会被吃掉），跨应用可读。
+lark api GET /open-apis/im/v1/messages/<om_> \
+  --params '{"card_msg_content_type":"user_card_content"}' \
+  --jq '.data.items[0].body.content' | jq -r .
 
 # 按条件列群消息
 lark api GET '/open-apis/im/v1/messages?container_id_type=chat&container_id=<oc_>&sort_type=ByCreateTimeDesc&page_size=20' \

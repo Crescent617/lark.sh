@@ -86,8 +86,8 @@ lark im desc oc_x '新群描述'               # 改描述
 消息列表里 sticker 的 content 只显示 `[Sticker]`，拿 file_key 要走 raw api：
 
 ```bash
-lark api GET /open-apis/im/v1/messages/<om_> --jq -r '.data.items[0].body.content'
-# => "{\"file_key\":\"v3_xxx\"}"（字符串化 JSON，二次解析）
+lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' | jq -r .
+# => "{\"file_key\":\"v3_xxx\"}"（字符串化 JSON，二次解析；--jq 无 -r，用 jq -r 解字符串）
 lark im dl <om_> . --file-key <v3_xxx> --type file
 ```
 
