@@ -6,7 +6,8 @@
 lark im read <oc_> -n 50                 # 最近 50 条（desc）
 lark im read <oc_> -n 50 --asc           # 正序
 lark im read <oc_> --start '<ts>' --end '<ts>'   # 时间窗（透传 lark-cli 同名参数）
-lark im thread <omt_> -n 100             # 话题（thread id 也有 om_ 形态）
+lark im read <oc_> --verbose             # 保留卡片折叠面板（默认剥离）
+lark im thread <omt_> -n 100             # 话题（thread id 也有 om_ 形态；--verbose 同 read）
 lark im mget om_a,om_b                   # 按 id 批量取
 ```
 
@@ -56,6 +57,7 @@ lark im send oc_x '<at user_id="ou_x">XXX</at> 看下'   # @人（user_id 必须
 ```bash
 lark im reply om_x '收到'                 # 主消息流回复
 lark im reply om_x '收到' --thread        # 进话题
+lark im reply om_x --markdown '**好**'    # markdown 回复（可叠 --thread，顺序任意）
 lark im sticker om_x <file_key>           # 以 sticker 回复该消息并进话题（最常用）
 lark im sticker om_x <file_key> --main    # 回复但不进话题
 lark im sticker oc_x <file_key>           # 直接发到群
