@@ -46,6 +46,7 @@ lark im send oc_x '文本'                  # 群
 lark im send ou_x '文本'                  # 私信
 lark im send oc_x --markdown '**粗体**'   # markdown
 lark im send oc_x --image ./图.png         # 图片（cwd 相对路径/URL/img_key；绝对路径与 .. 被拒）
+lark im send oc_x --file ./报告.pdf        # 文件（路径/URL/file_key；--video/--audio 同模式）
 lark im send oc_x @body.md                # 文件内容（wrapper 读文件，无相对路径限制）
 lark im send oc_x - <<'EOF'               # stdin
 长文
