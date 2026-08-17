@@ -67,7 +67,7 @@ IM:
   lark im read <oc_> [-n N] [--asc] [--verbose]  读群消息（默认 desc 最近 20 条；卡片折叠面板默认剥离，--verbose 保留）
   lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（折叠同 read）
   lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
-  lark im reply <om_> <text|@file|->       回复消息（--thread 进话题）
+  lark im reply <om_> <text|@file|->       回复消息（--thread 进话题；--markdown 富文本；--image/--file 等媒体同 send）
   lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息进话题，oc_=直发群；--main 回复不进话题）
   lark im dl <om_> [dir] [--file-key K] [--type file]  下载消息附件/图片
   lark im mget <om_>[,<om_>...]            按 id 批量取消息
@@ -189,10 +189,16 @@ im)
       while [ $# -gt 0 ]; do case "$1" in
         --thread) extra+=(--reply-in-thread); shift ;;
         --markdown) msgtype=markdown; shift ;;
+        --image|--file|--video|--audio) msgtype="${1#--}"; shift ;;
         *) break ;;
       esac; done
-      [ $# -ge 1 ] || die "im reply: 缺正文（文本、@file 或 -）"
-      body="$(load_text "$1")"; shift || true
+      case "$msgtype" in
+        image|file|video|audio)
+          body="$(need "${1:-}" "$msgtype 路径/URL/key")"; shift || true ;;
+        *)
+          [ $# -ge 1 ] || die "im reply: 缺正文（文本、@file 或 -）"
+          body="$(load_text "$1")"; shift || true ;;
+      esac
       exec lark-cli im +messages-reply --message-id "$mid" --"$msgtype" "$body" --as bot "${extra[@]}" "$@"
       ;;
     sticker)
