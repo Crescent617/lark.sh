@@ -28,13 +28,44 @@ load_text() {
   esac
 }
 
+# 拉一个容器内所有 interactive 卡片的"剥离折叠"正文 map（message_id → 顶层 markdown 拼接）。
+# 折叠组件 collapsible_panel 被剥掉 —— 默认视图不给别人（bot/人）看 yomi trace 之类的折叠内容。
+# 用法: card_fold_map <chat|thread> <container_id> <page_size> <order>
+card_fold_map() {
+  local ctype="$1" cid="$2" n="$3" order="$4"
+  lark-cli api GET /open-apis/im/v1/messages --as bot \
+    --params "$(jq -nc --arg t "$ctype" --arg c "$cid" --arg s "$order" --arg n "$n" \
+      '{container_id_type:$t, container_id:$c, sort_type:$s, page_size:$n, card_msg_content_type:"user_card_content"}')" \
+    --jq '[ .data.items[] | select(.msg_type=="interactive")
+            | { (.message_id): ((.body.content | fromjson? // {}) as $b
+                  | ($b.body.elements // $b.elements // [])
+                  | map(select(.tag=="markdown") | .content) | join("\n")) } ]
+          | add // {}'
+}
+
+# 把 lark-cli 消息列表里的 interactive 卡片 content 替换为剥离折叠后的版本。
+# 递归处理 thread_replies 嵌套；cardmap 里没有的 id 保持原样。
+# 用法: jq 过滤器，$cardmap 经 --argjson 传入。
+STRIP_FOLD_JQ='
+def rec: if type=="object" then with_entries(.value |= rec) elif type=="array" then map(rec) else . end;
+def stripwalk: . as $node
+  | if ($node|type)=="object" and ($node.msg_type? == "interactive") and ($cardmap[$node.message_id]? != null)
+    then $node + {content: ("<card>\n" + $cardmap[$node.message_id] + "\n</card>")}
+    else $node end;
+def deep: . as $in
+  | if ($in|type)=="object" then
+      ($in | stripwalk) | with_entries(.value |= deep)
+    elif ($in|type)=="array" then map(deep)
+    else $in end;
+deep'
+
 usage() {
   cat <<'EOF'
 lark — lark-cli 的 bot-only 封装（环境变量内置、--as bot 固化）
 
 IM:
-  lark im read <oc_> [-n N] [--asc]        读群消息（默认 desc 最近 20 条）
-  lark im thread <omt_|om_> [-n N]         读话题消息
+  lark im read <oc_> [-n N] [--asc] [--verbose]  读群消息（默认 desc 最近 20 条；卡片折叠面板默认剥离，--verbose 保留）
+  lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（折叠同 read）
   lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown）
   lark im reply <om_> <text|@file|->       回复消息（--thread 进话题）
   lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息进话题，oc_=直发群；--main 回复不进话题）
@@ -87,24 +118,47 @@ im)
   case "$sub" in
     read)
       chat="$(need "${1:-}" oc_)"; shift
-      n=20; order=desc
+      n=20; order=desc; verbose=0
       while [ $# -gt 0 ]; do case "$1" in
         -n) n="$2"; shift 2 ;;
         --asc) order=asc; shift ;;
+        --verbose) verbose=1; shift ;;
         *) break ;;
       esac; done
-      exec lark-cli im +chat-messages-list --chat-id "$chat" --order "$order" \
-        --page-size "$n" --no-reactions --format json --as bot "$@"
+      if [ "$verbose" = 1 ]; then
+        exec lark-cli im +chat-messages-list --chat-id "$chat" --order "$order" \
+          --page-size "$n" --no-reactions --format json --as bot "$@"
+      fi
+      cardmap="$(card_fold_map chat "$chat" "$n" "$( [ "$order" = asc ] && echo ByCreateTimeAsc || echo ByCreateTimeDesc )")"
+      lark-cli im +chat-messages-list --chat-id "$chat" --order "$order" \
+        --page-size "$n" --no-reactions --format json --as bot "$@" \
+        | jq --argjson cardmap "$cardmap" "$STRIP_FOLD_JQ"
       ;;
     thread)
       tid="$(need "${1:-}" thread_id)"; shift
-      n=20
+      n=20; verbose=0
       while [ $# -gt 0 ]; do case "$1" in
         -n) n="$2"; shift 2 ;;
+        --verbose) verbose=1; shift ;;
         *) break ;;
       esac; done
-      exec lark-cli im +threads-messages-list --thread "$tid" --order desc \
-        --page-size "$n" --format json --as bot "$@"
+      if [ "$verbose" = 1 ]; then
+        exec lark-cli im +threads-messages-list --thread "$tid" --order desc \
+          --page-size "$n" --format json --as bot "$@"
+      fi
+      # card_fold_map 的 thread 容器要 omt_；传 om_（root 消息）时先解析出 thread_id。
+      cid="$tid"
+      case "$tid" in
+        om_*)
+          cid="$(lark-cli api GET "/open-apis/im/v1/messages/$tid" --as bot \
+            --jq '.data.items[0].thread_id // empty' | tr -d '"')"
+          [ -n "$cid" ] || die "im thread: $tid 不在话题内，无法取 thread_id"
+          ;;
+      esac
+      cardmap="$(card_fold_map thread "$cid" "$n" ByCreateTimeDesc)"
+      lark-cli im +threads-messages-list --thread "$tid" --order desc \
+        --page-size "$n" --format json --as bot "$@" \
+        | jq --argjson cardmap "$cardmap" "$STRIP_FOLD_JQ"
       ;;
     send)
       target="$(need "${1:-}" 'oc_|ou_')"; shift
