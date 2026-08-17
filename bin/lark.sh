@@ -147,11 +147,41 @@ im)
       esac
       ;;
     dl)
+      # lark-cli 单资源下载（--file-key 必填、--output 为文件路径）：
+      # wrapper 在此之上补"全消息枚举附件 + 指定目录"。
       mid="$(need "${1:-}" om_)"; shift
       outdir="."
       if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then outdir="$1"; shift; fi
-      exec lark-cli im +messages-resources-download --message-id "$mid" \
-        --output-dir "$outdir" --as bot "$@"
+      case "$outdir" in
+        /*|*..*) die "im dl: 目录只接受 cwd 内相对路径" ;;
+      esac
+      mkdir -p "$outdir"
+      fkey="" rtype=""
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --file-key) fkey="$(need "${2:-}" file_key)"; shift 2 ;;
+          --type) rtype="$(need "${2:-}" type)"; shift 2 ;;
+          *) die "im dl: 未知参数 $1" ;;
+        esac
+      done
+      if [ -n "$fkey" ]; then
+        [ -z "$rtype" ] && case "$fkey" in img_*) rtype=image ;; *) rtype=file ;; esac
+        exec lark-cli im +messages-resources-download --message-id "$mid" \
+          --file-key "$fkey" --type "$rtype" --output "$outdir/$fkey" --as bot
+      fi
+      # 全量：读消息体枚举 image_key/file_key（post/img/file 消息通吃）
+      body="$(lark-cli api GET "/open-apis/im/v1/messages/$mid" --as bot \
+        --jq '.data.items[0].body.content' | jq -r .)" || die "im dl: 读消息失败 $mid"
+      keys="$(printf '%s' "$body" | jq -r \
+        '.. | objects | (.image_key? // empty), (.file_key? // empty)' | sort -u)"
+      [ -z "$keys" ] && die "im dl: 消息无附件 $mid"
+      rc=0
+      for k in $keys; do
+        case "$k" in img_*) t=image ;; *) t=file ;; esac
+        lark-cli im +messages-resources-download --message-id "$mid" \
+          --file-key "$k" --type "$t" --output "$outdir/$k" --as bot || rc=1
+      done
+      exit $rc
       ;;
     mget)
       ids="$(need "${1:-}" om_ids)"; shift
