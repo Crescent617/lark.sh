@@ -7,9 +7,11 @@ lark im read <oc_> -n 50                 # 最近 50 条（desc）
 lark im read <oc_> -n 50 --asc           # 正序
 lark im read <oc_> --start '<ts>' --end '<ts>'   # 时间窗（透传 lark-cli 同名参数）
 lark im read <oc_> --verbose             # 保留卡片折叠面板（默认剥离）
-lark im thread <omt_> -n 100             # 话题（thread id 也有 om_ 形态；--verbose 同 read）
+lark im thread <omt_> -n 50              # 话题（thread id 也有 om_ 形态；--verbose 同 read）
 lark im mget om_a,om_b                   # 按 id 批量取
 ```
+
+> `-n` 上限 **50**（消息列表 API page_size 硬顶，超了报 99992402），wrapper 会自动钳到 50；要更多用 `--page-token` 翻页（见下文「翻页」）。
 
 输出是 lark-cli 成功信封 `{ok, data, meta}`；shortcut 已归一化：消息在 `data.messages[]`，正文是**已解码的** `.content`（非字符串化 JSON），时间 `.create_time` 已格式化为 `YYYY-MM-DD HH:MM`。常用裁剪：
 

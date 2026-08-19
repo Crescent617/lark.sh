@@ -34,6 +34,7 @@ load_text() {
 # 用法: card_fold_map <chat|thread> <container_id> <page_size> <order>
 card_fold_map() {
   local ctype="$1" cid="$2" n="$3" order="$4"
+  [ "$n" -gt 50 ] && n=50 # 消息列表 API page_size 上限 50，超了报 99992402
   lark-cli api GET /open-apis/im/v1/messages --as bot \
     --params "$(jq -nc --arg t "$ctype" --arg c "$cid" --arg s "$order" --arg n "$n" \
       '{container_id_type:$t, container_id:$c, sort_type:$s, page_size:$n, card_msg_content_type:"user_card_content"}')" \
@@ -43,7 +44,7 @@ card_fold_map() {
                      + (($b.body.elements // $b.elements // [])
                         | map(select(.tag=="markdown") | .content)))
                   | join("\n")) } ]
-          | add // {}'
+          | add // {}' || echo '{}' # 卡片剥离失败不拖垮主列表（退化保留原卡片）
 }
 
 # 把 lark-cli 消息列表里的 interactive 卡片 content 替换为剥离折叠后的版本。
@@ -67,8 +68,8 @@ usage() {
 lark — lark-cli 的 bot-only 封装（环境变量内置、--as bot 固化）
 
 IM:
-  lark im read <oc_> [-n N] [--asc] [--verbose]  读群消息（默认 desc 最近 20 条；卡片折叠面板默认剥离，--verbose 保留）
-  lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（折叠同 read）
+  lark im read <oc_> [-n N] [--asc] [--verbose]  读群消息（默认 desc 最近 20 条，N 上限 50；卡片折叠面板默认剥离，--verbose 保留）
+  lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（N 上限 50，折叠同 read）
   lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
   lark im reply <om_> <text|@file|->       回复消息（--thread 进话题；--markdown 富文本；--image/--file 等媒体同 send）
   lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息默认回主流，oc_=直发群；--thread 进话题）
@@ -128,6 +129,7 @@ im)
         --verbose) verbose=1; shift ;;
         *) break ;;
       esac; done
+      [ "$n" -gt 50 ] && n=50 # API page_size 上限 50；更多用 --page-token 翻页
       if [ "$verbose" = 1 ]; then
         exec lark-cli im +chat-messages-list --chat-id "$chat" --order "$order" \
           --page-size "$n" --no-reactions --format json --as bot "$@"
@@ -145,6 +147,7 @@ im)
         --verbose) verbose=1; shift ;;
         *) break ;;
       esac; done
+      [ "$n" -gt 50 ] && n=50 # API page_size 上限 50；更多用 --page-token 翻页
       if [ "$verbose" = 1 ]; then
         exec lark-cli im +threads-messages-list --thread "$tid" --order desc \
           --page-size "$n" --format json --as bot "$@"
