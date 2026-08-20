@@ -68,7 +68,7 @@ usage() {
 lark — lark-cli 的 bot-only 封装（环境变量内置、--as bot 固化）
 
 IM:
-  lark im read <oc_> [-n N] [--asc] [--verbose]  读群消息（默认 desc 最近 20 条，N 上限 50；卡片折叠面板默认剥离，--verbose 保留）
+  lark im read <oc_> [-n N] [--asc] [--verbose] [--start <ts> --end <ts>] [--page-all]  读群消息（默认 desc 最近 20 条，N 上限 50；--start/--end 时间窗 ISO 8601；--page-all 拉全量；卡片折叠面板默认剥离，--verbose 保留）
   lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（N 上限 50，折叠同 read）
   lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
   lark im reply <om_> <text|@file|->       回复消息（--thread 进话题；--markdown 富文本；--image/--file 等媒体同 send）
@@ -122,35 +122,36 @@ im)
   case "$sub" in
     read)
       chat="$(need "${1:-}" oc_)"; shift
-      n=20; order=desc; verbose=0
+      n=20; order=desc; verbose=0; extra=()
+      # wrapper 自有 flag（-n/--asc/--verbose）任意位置都能出现；其余（--start/--end/--page-token/--page-all 等）原样透传
       while [ $# -gt 0 ]; do case "$1" in
         -n) n="$2"; shift 2 ;;
         --asc) order=asc; shift ;;
         --verbose) verbose=1; shift ;;
-        *) break ;;
+        *) extra+=("$1"); shift ;;
       esac; done
-      [ "$n" -gt 50 ] && n=50 # API page_size 上限 50；更多用 --page-token 翻页
+      [ "$n" -gt 50 ] && n=50 # API page_size 上限 50；更多用 --page-token 翻页或 --page-all
       if [ "$verbose" = 1 ]; then
         exec lark-cli im +chat-messages-list --chat-id "$chat" --order "$order" \
-          --page-size "$n" --no-reactions --format json --as bot "$@"
+          --page-size "$n" --no-reactions --format json --as bot "${extra[@]}"
       fi
       cardmap="$(card_fold_map chat "$chat" "$n" "$( [ "$order" = asc ] && echo ByCreateTimeAsc || echo ByCreateTimeDesc )")"
       lark-cli im +chat-messages-list --chat-id "$chat" --order "$order" \
-        --page-size "$n" --no-reactions --format json --as bot "$@" \
+        --page-size "$n" --no-reactions --format json --as bot "${extra[@]}" \
         | jq --argjson cardmap "$cardmap" "$STRIP_FOLD_JQ"
       ;;
     thread)
       tid="$(need "${1:-}" thread_id)"; shift
-      n=20; verbose=0
+      n=20; verbose=0; extra=()
       while [ $# -gt 0 ]; do case "$1" in
         -n) n="$2"; shift 2 ;;
         --verbose) verbose=1; shift ;;
-        *) break ;;
+        *) extra+=("$1"); shift ;;
       esac; done
       [ "$n" -gt 50 ] && n=50 # API page_size 上限 50；更多用 --page-token 翻页
       if [ "$verbose" = 1 ]; then
         exec lark-cli im +threads-messages-list --thread "$tid" --order desc \
-          --page-size "$n" --format json --as bot "$@"
+          --page-size "$n" --format json --as bot "${extra[@]}"
       fi
       # card_fold_map 的 thread 容器要 omt_；传 om_（root 消息）时先解析出 thread_id。
       cid="$tid"
@@ -163,7 +164,7 @@ im)
       esac
       cardmap="$(card_fold_map thread "$cid" "$n" ByCreateTimeDesc)"
       lark-cli im +threads-messages-list --thread "$tid" --order desc \
-        --page-size "$n" --format json --as bot "$@" \
+        --page-size "$n" --format json --as bot "${extra[@]}" \
         | jq --argjson cardmap "$cardmap" "$STRIP_FOLD_JQ"
       ;;
     send)

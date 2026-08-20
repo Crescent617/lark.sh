@@ -23,6 +23,7 @@ metadata:
 ```bash
 # IM
 lark im read <oc_> -n 20 # 读群消息，最新在前；--asc 最老在前；--verbose 保留卡片折叠（默认剥离）
+lark im read <oc_> --start "$s" --end "$e" --asc --page-all --page-limit 50 # 时间窗拉全量（ISO 8601 带冒号时区 +08:00）
 lark im read <oc_> --page-token '<tok>' # 翻页：带上上页的 page_token
 lark im thread <omt_> -n 20 # 读话题消息（--verbose 同 read）
 lark im send <oc_> '文本' # 发群消息；换 ou_ 发私信

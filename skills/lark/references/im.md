@@ -5,11 +5,16 @@
 ```bash
 lark im read <oc_> -n 50                 # 最近 50 条（desc）
 lark im read <oc_> -n 50 --asc           # 正序
-lark im read <oc_> --start '<ts>' --end '<ts>'   # 时间窗（透传 lark-cli 同名参数）
 lark im read <oc_> --verbose             # 保留卡片折叠面板（默认剥离）
+# 时间窗（wrapper flag 可任意位置混用）：
+start=$(date -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S%:z'); end=$(date '+%Y-%m-%dT%H:%M:%S%:z')
+lark im read <oc_> --start "$start" --end "$end" --asc --page-all --page-limit 50
 lark im thread <omt_> -n 50              # 话题（thread id 也有 om_ 形态；--verbose 同 read）
 lark im mget om_a,om_b                   # 按 id 批量取
 ```
+
+> 时间戳要 **ISO 8601 带冒号时区**（`+08:00`，`%:z`；`+0800` 会被拒）；`--start/--end` 也接受 Unix 时间戳与 `2026-01-01` 纯日期。
+> 时间窗模式建议带 `--page-all --page-limit N` 自动翻页拉全量（透传 lark-cli，单页上限 50）。
 
 > `-n` 上限 **50**（消息列表 API page_size 硬顶，超了报 99992402），wrapper 会自动钳到 50；要更多用 `--page-token` 翻页（见下文「翻页」）。
 
