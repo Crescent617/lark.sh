@@ -63,6 +63,73 @@ def deep: . as $in
     else $in end;
 deep'
 
+# ===== sticker 收藏夹（全局存储 + 按 appId 分目录；file_key 全程不出脚本）=====
+# 为什么不让 key 过调用方的手：LLM "复制"长随机串是逐 token 默写，
+# 极易拼接出缝合 key（2026-08-25 猫鼠 key 拼接事故）。调用方只递 关键词/行号/om_。
+# 存储：<LARK_STICKER_DIR|XDG_DATA_HOME|~/.local/share>/lark/stickers/<appId>/{stickers.md, stickers/}
+
+sticker_dir() {  # 输出当前 bot 的收藏目录（不存在则初始化目录 + 空索引模板）
+  local appid dir
+  appid="$(lark-cli config show 2>/dev/null | jq -r '.appId // empty')"
+  [ -n "$appid" ] || die "sticker: 解析 appId 失败（lark-cli config show）"
+  dir="${LARK_STICKER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/lark/stickers}/$appid"
+  if [ ! -f "$dir/stickers.md" ]; then
+    mkdir -p "$dir/stickers"
+    printf '# Sticker 收藏夹索引\n\n| file_key | 内容 | 适用场景 |\n|---|---|---|\n' > "$dir/stickers.md"
+  fi
+  printf '%s' "$dir"
+}
+
+st_key_of() { cut -d'`' -f2 <<<"${1:-$(cat)}"; }  # 数据行 → key（仅内部使用，绝不打印）
+st_desc_of() {                                    # 数据行 → '描述 — 场景'（剥 key，安全输出）
+  awk -F'|' '{gsub(/^ +| +$/,"",$3); gsub(/^ +| +$/,"",$4); printf "%s — %s", $3, $4}' <<<"${1:-$(cat)}"
+}
+
+# st_pick <idx> <关键词|行号>：选唯一数据行；无匹配 die；多匹配候选（含行号，不含 key）打 stderr，exit 3
+st_pick() {
+  local idx="$1" sel="$2"
+  if [[ "$sel" =~ ^[0-9]+$ ]]; then
+    local line; line="$(sed -n "${sel}p" "$idx")"
+    [[ "$line" == '| `'* ]] || die "sticker: 第 $sel 行不是数据行（用 sticker list 看行号）"
+    printf '%s\n' "$line"; return 0
+  fi
+  local hits n
+  hits="$(grep -n '^| `' "$idx" | grep -iF -- "$sel" || true)"
+  n="$(grep -c . <<<"$hits" || true)"
+  [ "$n" -ge 1 ] || die "sticker: 索引没匹配到「$sel」（sticker list 看看有啥）"
+  if [ "$n" -gt 1 ]; then
+    echo "$PROG: sticker: 「$sel」匹配 $n 条，换更准的关键词或直接给行号：" >&2
+    printf '%s\n' "$hits" | while IFS= read -r l; do
+      echo "  L${l%%:*}  $(st_desc_of "${l#*:}")" >&2
+    done
+    exit 3
+  fi
+  printf '%s\n' "${hits#*:}"
+}
+
+# 底层 sticker 发送：om_=回复该消息（默认回主流，--thread 进话题），oc_=直发群。
+st_post() {
+  local target="$1" key="$2"; shift 2
+  local content data
+  content="$(jq -nc --arg k "$key" '{file_key:$k}')"
+  case "$target" in
+    om_*)
+      local in_thread=false
+      if [ "${1:-}" = "--thread" ]; then in_thread=true; shift; fi
+      data="$(jq -nc --arg c "$content" --argjson t "$in_thread" \
+        '{content:$c,msg_type:"sticker",reply_in_thread:$t}')"
+      lark-cli api POST "/open-apis/im/v1/messages/$target/reply" --data "$data" --as bot "$@"
+      ;;
+    oc_*)
+      data="$(jq -nc --arg c "$content" --arg r "$target" \
+        '{receive_id:$r,content:$c,msg_type:"sticker"}')"
+      lark-cli api POST /open-apis/im/v1/messages \
+        --params '{"receive_id_type":"chat_id"}' --data "$data" --as bot "$@"
+      ;;
+    *) die "sticker: target 必须是 om_（回复）或 oc_（群发）：$target" ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 lark — lark-cli 的 bot-only 封装（环境变量内置、--as bot 固化）
@@ -104,6 +171,13 @@ BOARD:
   lark board create <doc> [--svg] <代码|@file|->   在文档末尾插入画板（默认 mermaid，--svg 切 SVG）
   lark board export [args...]              导出画板（--whiteboard-token 必填；--output-type preview|svg|source|raw）
   lark board update [args...]              更新画板（--whiteboard-token 必填；--source 支持 @file/-；--input_format raw|plantuml|mermaid|svg）
+
+STICKER（收藏夹全局存储，按 appId 分目录；file_key 全程不出脚本，调用方只递 关键词/行号/om_）:
+  lark sticker send <oc_|om_> <关键词|行号> [--thread]   按描述/场景关键词或索引行号发表情（多匹配列候选，exit 3）
+  lark sticker list [关键词]               列收藏（行号 + 描述 + 场景，不含 key）
+  lark sticker add <om_> '<描述>' '<场景>'  收藏消息里的表情（自动取 key、去重、存图到收藏目录）
+  lark sticker rm <行号|关键词>              删收藏（关键词须唯一匹配）
+  存储：<LARK_STICKER_DIR|XDG_DATA_HOME|~/.local/share>/lark/stickers/<appId>/
 
 逃生舱口:
   lark api <METHOD> <path> [args...]       透传 lark-cli api（自动 --as bot），如 --params/--data/--jq
@@ -210,24 +284,7 @@ im)
       ;;
     sticker)
       target="$(need "${1:-}" 'om_|oc_')"; key="$(need "${2:-}" file_key)"; shift 2
-      content="$(jq -nc --arg k "$key" '{file_key:$k}')"
-      case "$target" in
-        om_*)
-          # 与 im reply 同一语义：默认回主消息流，--thread 才进话题。
-          in_thread=false
-          if [ "${1:-}" = "--thread" ]; then in_thread=true; shift; fi
-          data="$(jq -nc --arg c "$content" --argjson t "$in_thread" \
-            '{content:$c,msg_type:"sticker",reply_in_thread:$t}')"
-          exec lark-cli api POST "/open-apis/im/v1/messages/$target/reply" --data "$data" --as bot "$@"
-          ;;
-        oc_*)
-          data="$(jq -nc --arg c "$content" --arg r "$target" \
-            '{receive_id:$r,content:$c,msg_type:"sticker"}')"
-          exec lark-cli api POST /open-apis/im/v1/messages \
-            --params '{"receive_id_type":"chat_id"}' --data "$data" --as bot "$@"
-          ;;
-        *) die "im sticker: target 必须是 om_（回复）或 oc_（群发）：$target" ;;
-      esac
+      st_post "$target" "$key" "$@"
       ;;
     dl)
       # lark-cli 单资源下载（--file-key 必填、--output 为文件路径）：
@@ -410,6 +467,72 @@ board)
   esac
   ;;
 
+sticker)
+  # 收藏夹 CRUD + 关键词发送：file_key 只在脚本内部流转，不向 stdout 暴露。
+  [ $# -ge 1 ] || die "sticker: 缺子命令（send/list/add/rm）"
+  sub="$1"; shift
+  dir="$(sticker_dir)"; idx="$dir/stickers.md"
+  case "$sub" in
+    send)
+      target="$(need "${1:-}" 'oc_|om_')"; sel="$(need "${2:-}" '关键词|行号')"; shift 2
+      row="$(st_pick "$idx" "$sel")"
+      key="$(st_key_of "$row")"
+      [ -n "$key" ] || die "sticker send: 数据行解析不出 file_key（索引格式坏了？）"
+      out="$(st_post "$target" "$key" "$@")"
+      # 结果剥掉 body（含 file_key）再输出
+      printf '%s\n' "$out" | jq --arg sent "$(st_desc_of "$row")" \
+        '{ok, identity, message_id: .data.message_id, sent: $sent, error}'
+      ;;
+    list)
+      hits="$(grep -n '^| `' "$idx" || true)"
+      [ $# -ge 1 ] && hits="$(grep -iF -- "$1" <<<"$hits" || true)"
+      [ -n "$hits" ] || { echo "（无匹配）"; exit 0; }
+      printf '%s\n' "$hits" | while IFS= read -r l; do
+        printf 'L%-5s %s\n' "${l%%:*}" "$(st_desc_of "${l#*:}")"
+      done
+      ;;
+    add)
+      om="$(need "${1:-}" om_)"; desc="$(need "${2:-}" 描述)"; scene="$(need "${3:-}" 场景关键词)"; shift 3
+      raw="$(lark-cli api GET "/open-apis/im/v1/messages/$om" --as bot \
+        --jq '.data.items[0] | {t: .msg_type, c: .body.content}')"
+      [ "$(jq -r '.t // empty' <<<"$raw")" = "sticker" ] || die "sticker add: 该消息不是 sticker"
+      key="$(jq -r '.c | if type == "string" then (fromjson // .) else . end | .file_key // empty' <<<"$raw")"
+      [ -n "$key" ] || die "sticker add: 消息里解析不出 file_key"
+      if grep -qF "$key" "$idx"; then
+        echo "$PROG: 已收藏过，不重复入库：$(grep -F "$key" "$idx" | head -1 | st_desc_of)"
+        exit 0
+      fi
+      printf '| `%s` | %s | %s |\n' "$key" "${desc//|/、}" "${scene//|/、}" >> "$idx"
+      ( cd "$dir" && lark-cli im +messages-resources-download --message-id "$om" \
+          --file-key "$key" --type file --output "stickers/$key" --as bot >/dev/null 2>&1 ) \
+        || echo "$PROG: 警告：表情图片下载失败（索引已入）$om" >&2
+      echo "$PROG: 已收藏：$desc — $scene"
+      ;;
+    rm)
+      sel="$(need "${1:-}" '行号|关键词')"
+      if [[ "$sel" =~ ^[0-9]+$ ]]; then
+        lineno="$sel"; row="$(sed -n "${sel}p" "$idx")"
+        [[ "$row" == '| `'* ]] || die "sticker rm: 第 $sel 行不是数据行"
+      else
+        hits="$(grep -n '^| `' "$idx" | grep -iF -- "$sel" || true)"
+        n="$(grep -c . <<<"$hits" || true)"
+        [ "$n" -ge 1 ] || die "sticker rm: 索引没匹配到「$sel」"
+        if [ "$n" -gt 1 ]; then
+          echo "$PROG: sticker rm: 「$sel」匹配 $n 条，需唯一匹配，请用行号：" >&2
+          printf '%s\n' "$hits" | while IFS= read -r l; do
+            echo "  L${l%%:*}  $(st_desc_of "${l#*:}")" >&2
+          done
+          exit 3
+        fi
+        lineno="${hits%%:*}"; row="${hits#*:}"
+      fi
+      sed -i "${lineno}d" "$idx"
+      echo "$PROG: 已删除 L$lineno：$(st_desc_of "$row")"
+      ;;
+    *) die "sticker: 未知子命令 $sub（send/list/add/rm）" ;;
+  esac
+  ;;
+
 api)
   method="$(need "${1:-}" METHOD)"; path="$(need "${2:-}" path)"; shift 2
   exec lark-cli api "$method" "$path" --as bot "$@"
@@ -420,6 +543,6 @@ api)
   ;;
 
 *)
-  die "未知分类：${category}（im/doc/sheet/contact/cal/drive/board/api，-h 看帮助）"
+  die "未知分类：${category}（im/doc/sheet/contact/cal/drive/board/sticker/api，-h 看帮助）"
   ;;
 esac
