@@ -33,6 +33,7 @@ lark im send <oc_> --file ./报告.pdf # 发文件（路径/URL/file_key；--vid
 lark im send <oc_> '<at user_id="ou_x">名字</at> 看下' # @人（user_id 必须带引号，否则静默不解析）
 lark im reply <om_> '文本' # 回复；--thread 进话题；--markdown 发富文本
 lark im sticker <om_> <file_key> # 表情回复（默认回主流，--thread 进话题）；换 oc_ 直发群
+lark sticker send <oc_|om_> <关键词> # 【推荐】按收藏夹关键词发表情，file_key 不过手；send/list/add/rm 详见下方 sticker 规则
 lark im dl <om_> ./dir # 下载消息附件
 lark im members <oc_> # 列群成员
 lark im find '关键词' # 按名搜群
@@ -82,5 +83,10 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 
 ## sticker 规则
 
-- 收藏夹 = `references/stickers.md` + `stickers/`（本机文件，gitignore 不上传，可能尚不存在）；没有合适的 file_key 就直说没有，**不要编**。收藏流程见 `im.md`。
+- **一律走 `lark sticker` 系列命令，file_key 全程不过手**：LLM 的"复制"是逐 token 默写，长随机串必出缝合事故（2026-08-25 猫鼠 key 拼接案）。
+  - `lark sticker send <oc_|om_> <关键词|行号> [--thread]`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号
+  - `lark sticker list [关键词]`：看收藏（行号 + 描述 + 场景，无 key）
+  - `lark sticker add <om_> '<描述>' '<场景>'`：收藏消息里的表情（自动取 key、去重、存图；先看图写法见 `im.md`）
+  - `lark sticker rm <行号|关键词>`：删收藏
+- 存储在全局目录 `~/.local/share/lark/stickers/<appId>/`（按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖）；索引里没合适的就直说没有，**不要编**。
 - 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个；进当前 thread 就显式加 `--thread`（命令默认回主流）；⚠️ 标记者只对熟人用。

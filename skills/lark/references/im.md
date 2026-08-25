@@ -98,7 +98,11 @@ lark im desc oc_x '新群描述'               # 改描述
 
 ## sticker 收藏流程
 
-消息列表里 sticker 的 content 只显示 `[Sticker]`，拿 file_key 要走 raw api：
+**一律用 `lark sticker add <om_> '<描述>' '<场景>'`**（自动取 key、去重、存图，key 全程不过手）——收藏夹已迁到全局存储 `~/.local/share/lark/stickers/<appId>/`（按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖），CRUD/发送细节见 SKILL.md「sticker 规则」。
+
+想看图再写描述：先 `lark im dl <om_> ./tmpdir` 下载到本地看图，再 add。
+
+raw api 逃生路径（调试用，正常不走）：消息列表里 sticker 的 content 只显示 `[Sticker]`，拿 file_key：
 
 ```bash
 lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' | jq -r .
@@ -106,16 +110,4 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 lark im dl <om_> . --file-key <v3_xxx> --type file
 ```
 
-然后看图写描述，图片存 `references/stickers/<file_key>.<ext>`，在 `stickers.md` 索引表追加一行。file_key 与采集租户绑定，跨租户可能失效。
-
-**首次收藏时 `stickers.md` 与 `stickers/` 目录都不存在，自行创建**。这两个文件已 gitignore（本地收藏夹，不上传 GitHub），**不要 git add / 提交**。新建 `stickers.md` 用以下模板起手（之后只在表格里追加行）：
-
-```markdown
-# Sticker 收藏夹索引
-
-
-| file_key | 内容 | 适用场景 |
-|---|---|---|
-| `<file_key>` | <画面描述含配字；粗口/攻击性加 ⚠️ 前缀> | <逗号分隔的触发场景关键词> |
-
-```
+file_key 与采集租户绑定，跨租户可能失效（这就是按 appId 分目录的原因）。
