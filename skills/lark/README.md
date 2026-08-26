@@ -27,7 +27,7 @@ follow im.md
 
 ## 边界
 
-只支持 bot 身份。
+默认 bot 身份；`lark` 后首位加 `-u` 切 user 身份（user 写操作先经人确认）。
 
 ## 隐私说明
 

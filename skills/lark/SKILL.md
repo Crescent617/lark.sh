@@ -1,6 +1,6 @@
 ---
 name: lark
-description: 飞书一站式操作（lark.sh，lark-cli 的 bot-only 封装）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。
+description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。
 metadata:
   requires:
     bins: ["lark", "lark-cli", "jq"]
@@ -12,7 +12,7 @@ metadata:
 
 ## 规则（先读）
 
-1. **bot-only**：本封装没有 user 身份。
+1. **默认 bot 身份**：`lark` 后首位加 `-u` 整条切 user（`lark -u im read ...`）；user 身份的写操作（发消息/改文档/删文件等）先向用户确认再执行。
 2. **当前会话不要重复发**：agent 的回复文本会自动落到当前 chat/thread；只有跨 chat、私信、sticker 才用 `lark im send/sticker`。
 3. **高危门禁**：删文件等操作 lark-cli 会 exit 10 要确认——先向用户确认，同意后在原命令末尾补 `--yes` 重跑，绝不静默加。
 4. **判成功用 `ok == true`**（或退出码 0），不要用 `code == 0`。
