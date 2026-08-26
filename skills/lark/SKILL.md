@@ -33,7 +33,7 @@ lark im send <oc_> --file ./报告.pdf # 发文件（路径/URL/file_key；--vid
 lark im send <oc_> '<at user_id="ou_x">名字</at> 看下' # @人（user_id 必须带引号，否则静默不解析）
 lark im reply <om_> '文本' # 回复；--thread 进话题；--markdown 发富文本
 lark im sticker <om_> <file_key> # 表情回复（默认回主流，--thread 进话题）；换 oc_ 直发群
-lark sticker send <oc_|om_> <关键词> # 【推荐】按收藏夹关键词发表情，file_key 不过手；send/list/add/rm 详见下方 sticker 规则
+lark sticker send <oc_|om_> <关键词> # 【推荐】按收藏夹关键词发表情，详见下方 sticker 规则
 lark im dl <om_> ./dir # 下载消息附件
 lark im members <oc_> # 列群成员
 lark im find '关键词' # 按名搜群
@@ -55,7 +55,7 @@ lark contact get <ou_> # 查 open_id 是谁
 lark cal freebusy <ou_> <起> <止> # 查忙闲
 
 # 画板
-lark board create <doc> 'graph TD;A-->B' # 文末新建画板（mermaid）
+lark board create <doc> @a.mmd # 文末新建画板（mermaid 需多行，单行会被服务端拒收）
 lark board update --whiteboard-token <tok> --source @a.mmd --input_format mermaid # 更新画板
 lark board export --whiteboard-token <tok> --output-type svg --output b.svg # 导出画板
 
@@ -78,12 +78,10 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 | `references/board.md` | 画板创建/更新/导出 |
 | `references/contact-calendar.md` | 查人、忙闲 |
 | `references/api.md` | raw api 打法与实测可用的路径食谱 |
-| `references/stickers.md` | **sticker 收藏夹索引表**（file_key → 内容/场景）；本机文件，可能不存在——见下方 sticker 规则 |
-
 
 ## sticker 规则
 
-- **一律走 `lark sticker` 系列命令，file_key 全程不过手**：LLM 的"复制"是逐 token 默写，长随机串必出缝合事故（2026-08-25 猫鼠 key 拼接案）。
+- **一律走 `lark sticker` 系列命令，file_key 全程不过手**：LLM 的"复制"是逐 token 默写，长随机串必出缝合事故。
   - `lark sticker send <oc_|om_> <关键词|行号> [--thread]`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号
   - `lark sticker list [关键词]`：看收藏（行号 + 描述 + 场景，无 key）
   - `lark sticker add <om_> '<描述>' '<场景>'`：收藏消息里的表情（自动取 key、去重、存图；先看图写法见 `im.md`）
