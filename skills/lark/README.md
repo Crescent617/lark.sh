@@ -22,8 +22,8 @@ follow im.md
 ## 结构
 
 - `SKILL.md`——agent 操作手册：规则、常用命令、sticker 规则（发送时机等）
-- `references/`——agent 按需加载的深度参考（im / docs / sheets / drive / contact-calendar / api）
-- `references/stickers.md` + `references/stickers/`——sticker 收藏夹（见下方隐私说明）
+- `references/`——agent 按需加载的深度参考（im / docs / sheets / drive / board / contact-calendar / api）
+- sticker 收藏夹：全局目录 `~/.local/share/lark/stickers/<appId>/`（不进本仓库）
 
 ## 边界
 
@@ -31,4 +31,4 @@ follow im.md
 
 ## 隐私说明
 
-sticker 收藏夹（`references/stickers.md` 与 `stickers/` 图片）是**本地产物，已 gitignore，不会上传 GitHub**；换机器/重新 clone 后收藏夹为空，由 agent 在使用中按 `references/im.md` 的收藏流程重新采集积累。
+sticker 收藏夹（索引 + 图片）存于上述全局目录，**从不进仓库、不上传 GitHub**；换机器后为空，由 agent 在使用中按 `references/im.md` 的收藏流程重新积累。

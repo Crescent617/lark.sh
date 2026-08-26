@@ -2,7 +2,9 @@
 """lark 端到端测试：真实调 lark-cli 打飞书（需已配置 bot 凭证；-u 用例需 user 凭证）。
 
 用法：
-  LARK_E2E_CHAT=oc_xxx LARK_E2E_OU=ou_xxx python3 tests/e2e.py [--bin bin/lark.py] [--parity bin/lark.sh]
+  LARK_E2E_CHAT=oc_xxx LARK_E2E_OU=ou_xxx python3 tests/e2e.py [--bin bin/lark.py] [--parity <旧版 lark 路径>]
+
+  （旧版只存在于 git 历史：git show '<重写前 commit>:bin/lark.sh' > /tmp/lark_old && chmod +x /tmp/lark_old）
 
 --parity：对确定性只读命令同时跑旧版与新版，退出码/stdout 必须一致（im read 允许重试一次，
           防两次调用之间新消息落入）。
