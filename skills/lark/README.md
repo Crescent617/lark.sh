@@ -1,6 +1,6 @@
 # lark skill
 
-配合 `bin/lark.sh`（lark-cli 的 bot-only 封装）使用的 agent skill。`SKILL.md` 是 agent 操作手册，人类向的说明都在本文件。
+配合 `bin/lark.py`（lark-cli 的轻封装：默认 bot 身份，`-u` 切 user）使用的 agent skill。`SKILL.md` 是 agent 操作手册，人类向的说明都在本文件。依赖：python3、lark-cli、jq。
 
 ## 安装
 
@@ -8,7 +8,7 @@
 # 在仓库根目录下执行
 
 # 1. lark 命令上 PATH
-ln -s "$(pwd)/bin/lark.sh" ~/.local/bin/lark   # 或任何 PATH 内且持久的目录
+ln -s "$(pwd)/bin/lark.py" ~/.local/bin/lark   # 或任何 PATH 内且持久的目录
 lark -h                                           # 验证
 
 # 2. skill 接入 agent（symlink 进 skills 目录）

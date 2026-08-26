@@ -8,8 +8,9 @@
 
 实战 session 里 751 条 lark-cli 命令暴露的重复逻辑：每条命令都要重打两个 `_NOTIFIER` 环境变量、`--as bot`、冗长的 shortcut 名（`+chat-messages-list`）。本仓库把它收敛成一件事：
 
-- `bin/lark.sh`——内置环境变量、默认 `--as bot`（首位 `-u` 切 user）、按场景分类的短命令；
-- `skills/lark/`——一个 skill 装全部：SKILL.md 只放常用命令，细节在 `references/`。
+- `bin/lark.py`——内置环境变量、默认 `--as bot`（首位 `-u` 切 user）、按场景分类的短命令（Python/argparse，stdlib-only；bash 旧版见 git 历史）；
+- `skills/lark/`——一个 skill 装全部：SKILL.md 只放常用命令，细节在 `references/`；
+- `tests/e2e.py`——真实环境端到端测试（需 bot 凭证 + `LARK_E2E_CHAT`/`LARK_E2E_OU`）。
 
 ## 安装 / 使用
 

@@ -10,6 +10,11 @@ lark board create <doc> @diagram.mmd       # 从文件/stdin 读
 lark board create <doc> --svg @fig.svg     # SVG 画板
 ```
 
+两个服务端怪癖（2026-08-26 e2e 实测，bash/Python 两版一致）：
+
+- **单行 mermaid 会被拒**：`'graph TD;A-->B'` 报 `degrade_code=2107 Whiteboard content parse failed`；改成多行（`graph TD\n  A-->B\n`）即过。
+- **mermaid→画板转换有降级时间窗**：同一命令前后相隔 ~15min 可以从全成功变全失败（`degrade_code=2107 + 1003`，`result: failed`），又自行恢复；密集文档编辑会加剧。失败后 sleep 2 重试；持续失败就是服务端窗口，等窗口过去，不是 wrapper 问题。
+
 插文档中间：`lark doc replace` 或 docx block API。
 
 ## 更新
