@@ -30,6 +30,9 @@ EOF
 
 # 云盘权限成员
 lark api POST /open-apis/drive/v1/permissions/<token>/members --data '...'
+
+# 给消息加 reaction（emoji_type 如 OK / THUMBSUP / DONE / SMILE / LAUGH / HEART）
+lark api POST /open-apis/im/v1/messages/<om_>/reactions --data '{"reaction_type":{"emoji_type":"OK"}}'
 ```
 
 ## 打法要点
