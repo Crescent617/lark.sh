@@ -1,0 +1,16 @@
+# 本地产物
+*.bin
+*.log
+.DS_Store
+
+# 下载临时目录（sticker/附件下载的默认落点）
+/dl/
+/tmp/
+
+# 授权二维码等一次性图片
+qr*.png
+*qrcode*.png
+
+# sticker 收藏夹（本地产物，不上传 GitHub；初始不存在，由 agent 采集自建）
+skills/lark/references/stickers.md
+skills/lark/references/stickers/
