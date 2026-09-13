@@ -66,11 +66,10 @@ lark im send oc_x '<at user_id="ou_x">XXX</at> 看下'   # @人（user_id 必须
 ## 回复 / sticker
 
 ```bash
-lark im reply om_x '收到'                 # 主消息流回复
-lark im reply om_x '收到' --thread        # 进话题
+lark im reply om_x '收到'                 # 回复该消息（落点跟随它：主流回主流，话题留话题）
+lark im reply om_x '收到' --thread        # 强制进话题
 lark im reply om_x --markdown '**好**'    # markdown 回复（可叠 --thread，顺序任意）
-lark im sticker om_x <file_key>           # 以 sticker 回复该消息（默认回主消息流，同 reply）
-lark im sticker om_x <file_key>           # 回复回主流
+lark im sticker om_x <file_key>           # 以 sticker 回复该消息（落点跟随该消息，同 reply）
 lark im sticker omt_x <file_key>          # 直发进话题
 lark im sticker oc_x <file_key>           # 直接发到群
 ```
