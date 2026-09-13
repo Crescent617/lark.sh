@@ -23,7 +23,7 @@ follow im.md
 
 - `SKILL.md`——agent 操作手册：规则、常用命令、sticker 规则（发送时机等）
 - `references/`——agent 按需加载的深度参考（im / docs / sheets / drive / board / contact-calendar / api）
-- sticker 收藏夹：全局目录 `~/.local/share/lark/stickers/<appId>/`（不进本仓库）
+- sticker 收藏夹：全局目录 `~/.yomi/state/lark/stickers/<appId>/`（不进本仓库）
 
 ## 边界
 

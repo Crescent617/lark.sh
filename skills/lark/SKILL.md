@@ -86,7 +86,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
   - `lark sticker list [关键词]`：看收藏（行号 + 描述 + 场景，无 key）
   - `lark sticker add <om_> '<描述>' '<场景>'`：收藏消息里的表情（自动取 key、去重、存图；先看图写法见 `im.md`）
   - `lark sticker rm <行号|关键词>`：删收藏
-- 存储在全局目录 `~/.local/share/lark/stickers/<appId>/`（按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖）；索引里没合适的就直说没有，**不要编**。
+- 存储在全局目录 `~/.yomi/state/lark/stickers/<appId>/`（yomi state dir 下按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖）；索引里没合适的就直说没有，**不要编**。
 - 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个；进当前 thread 就显式加 `--thread`（命令默认回主流）；⚠️ 标记者只对熟人用。
 
 ## 跨 chat 提问

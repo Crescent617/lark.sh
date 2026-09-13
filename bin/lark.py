@@ -126,7 +126,7 @@ def strip_fold(node, cardmap):
 # ===== sticker 收藏夹（全局存储 + 按 appId 分目录；file_key 全程不出脚本）=====
 # 为什么不让 key 过调用方的手：LLM "复制"长随机串是逐 token 默写，
 # 极易拼接出缝合 key（2026-08-25 猫鼠 key 拼接事故）。调用方只递 关键词/行号/om_。
-# 存储：<LARK_STICKER_DIR|XDG_DATA_HOME|~/.local/share>/lark/stickers/<appId>/{stickers.md, stickers/}
+# 存储：<LARK_STICKER_DIR|YOMI_DATA_DIR|~/.yomi>/state/lark/stickers/<appId>/{stickers.md, stickers/}
 
 def sticker_dir():
     """当前 bot 的收藏目录（不存在则初始化目录 + 空索引模板）。"""
@@ -140,8 +140,8 @@ def sticker_dir():
     if not appid:
         die("sticker: 解析 appId 失败（lark-cli config show）")
     base = os.environ.get("LARK_STICKER_DIR") or os.path.join(
-        os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share"),
-        "lark", "stickers")
+        os.environ.get("YOMI_DATA_DIR") or str(Path.home() / ".yomi"),
+        "state", "lark", "stickers")
     d = Path(base) / appid
     idx = d / "stickers.md"
     if not idx.exists():
@@ -262,7 +262,7 @@ STICKER（收藏夹全局存储，按 appId 分目录；file_key 全程不出脚
   lark sticker list [关键词]               列收藏（行号 + 描述 + 场景，不含 key）
   lark sticker add <om_> '<描述>' '<场景>'  收藏消息里的表情（自动取 key、去重、存图到收藏目录）
   lark sticker rm <行号|关键词>              删收藏（关键词须唯一匹配）
-  存储：<LARK_STICKER_DIR|XDG_DATA_HOME|~/.local/share>/lark/stickers/<appId>/
+  存储：<LARK_STICKER_DIR|YOMI_DATA_DIR|~/.yomi>/state/lark/stickers/<appId>/
 
 逃生舱口:
   lark api <METHOD> <path> [args...]       透传 lark-cli api，如 --params/--data/--jq
