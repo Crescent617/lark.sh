@@ -98,7 +98,7 @@ lark im desc oc_x '新群描述'               # 改描述
 
 ## sticker 收藏流程
 
-**一律用 `lark sticker add <om_> '<描述>' '<场景>'`**（自动取 key、去重、存图，key 全程不过手）——收藏夹在全局存储 `~/.yomi/state/lark/stickers/<appId>/`（yomi state dir 下按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖），CRUD/发送细节见 SKILL.md「sticker 规则」。
+**一律用 `lark sticker add <om_> '<描述>' '<场景>'`**（自动取 key、去重、存图，key 全程不过手）；存储路径、CRUD、发送时机见 SKILL.md「sticker 规则」。
 
 想看图再写描述：先 `lark im dl <om_> ./tmpdir` 下载到本地看图，再 add。
 
