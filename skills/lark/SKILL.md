@@ -82,7 +82,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 ## sticker 规则
 
 - **一律走 `lark sticker` 系列命令，file_key 全程不过手**（长随机串默写必出错）。
-  - `lark sticker send <oc_|om_|omt_> <关键词|行号>`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号。落点：`oc_`=群主流；`om_`=回复该消息（落点跟随它——主流的落主流，话题里的留话题）；`omt_`=进该话题——**进当前 thread 就拿信封 `thread:` 的 `omt_` 当目标**
+  - `lark sticker send <oc_|om_|omt_> <关键词|行号>`：按描述/场景关键词发，多匹配列候选（exit 3）。落点：`oc_`=群主流，`om_`=跟随被回复的消息，`omt_`=进话题（当前 thread 直接用信封 `thread:` 值）
   - `lark sticker list [关键词]`：看收藏（行号 + 描述 + 场景，无 key）
   - `lark sticker add <om_> '<描述>' '<场景>'`：收藏消息里的表情（自动取 key、去重、存图；先看图写法见 `im.md`）
   - `lark sticker rm <行号|关键词>`：删收藏
