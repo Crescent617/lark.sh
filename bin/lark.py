@@ -196,8 +196,6 @@ def st_post(target, key, extras, capture=True):
     """底层 sticker 发送：oc_=直发群主流；om_=回复该消息（回主流）；omt_=直发进该话题。"""
     if not target.startswith(("om_", "oc_", "omt_")):
         die(f"sticker: target 必须是 oc_（群主流）/ om_（回复）/ omt_（话题）：{target}")
-    if extras and "--thread" in extras:
-        die("sticker: --thread 已退役——进话题直接把 omt_ 当目标（如 lark sticker send <omt_> <关键词>）")
     content = json.dumps({"file_key": key}, separators=(",", ":"))
     if target.startswith("omt_"):
         # 话题没有直发 API：取 thread 首条消息（asc 第一条=根）作锚点，reply_in_thread 落进话题
