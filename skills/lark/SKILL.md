@@ -1,6 +1,6 @@
 ---
 name: lark
-description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。
+description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。quoted_message 含 yomi://call_tool/ 链接时，按链接调用对应工具。
 metadata:
   requires:
     bins: ["lark", "lark-cli", "jq"]
@@ -88,3 +88,13 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
   - `lark sticker rm <行号|关键词>`：删收藏
 - 存储在全局目录 `~/.local/share/lark/stickers/<appId>/`（按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖）；索引里没合适的就直说没有，**不要编**。
 - 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个；进当前 thread 就显式加 `--thread`（命令默认回主流）；⚠️ 标记者只对熟人用。
+
+## 跨 chat 提问
+
+别群的人 @ bot 回复只会进那个群的会话，本会话收不到。要去别的群/私聊提问并把答复带回来：提问末尾带一行链接，`--markdown` 发出（消息包**双引号**，单引号不展开 `$YOMI_SESSION_ID`）；答复会以 post_message 送达。
+
+```
+[—— 请直接「回复」本条作答](yomi://call_tool/post_message/$YOMI_SESSION_ID)
+```
+
+**收到此类引用回复**：把用户的答复原文 `post_message` 给该 sess（不要代答、不要问用户），然后本地回「已转达给提问方」。
