@@ -32,7 +32,7 @@ lark im send <oc_> --image ./图.png # 发图片（路径/URL/img_key）
 lark im send <oc_> --file ./报告.pdf # 发文件（路径/URL/file_key；--video/--audio 同理）
 lark im send <oc_> '<at user_id="ou_x">名字</at> 看下' # @人（user_id 必须带引号，否则静默不解析）
 lark im reply <om_> '文本' # 回复；--thread 进话题；--markdown 发富文本
-lark im sticker <om_> <file_key> # 表情回复（回主流）；换 oc_ 直发群主流，换 omt_ 直发进话题
+lark im sticker <om_> <file_key> # 回复该消息发表情（落主流）；换 oc_ 直发群主流，换 omt_ 直发进话题
 lark sticker send <oc_|om_> <关键词> # 【推荐】按收藏夹关键词发表情，详见下方 sticker 规则
 lark im dl <om_> ./dir # 下载消息附件
 lark im members <oc_> # 列群成员
@@ -82,7 +82,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 ## sticker 规则
 
 - **一律走 `lark sticker` 系列命令，file_key 全程不过手**：LLM 的"复制"是逐 token 默写，长随机串必出缝合事故。
-  - `lark sticker send <oc_|om_|omt_> <关键词|行号>`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号。落点看目标前缀：`oc_`=群主流，`om_`=回复回主流，`omt_`=进该话题——**进当前 thread 就拿信封 `thread:` 的 `omt_` 当目标**
+  - `lark sticker send <oc_|om_|omt_> <关键词|行号>`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号。落点看目标前缀：`oc_`=群主流，`om_`=回复该消息（落主流），`omt_`=进该话题——**进当前 thread 就拿信封 `thread:` 的 `omt_` 当目标**
   - `lark sticker list [关键词]`：看收藏（行号 + 描述 + 场景，无 key）
   - `lark sticker add <om_> '<描述>' '<场景>'`：收藏消息里的表情（自动取 key、去重、存图；先看图写法见 `im.md`）
   - `lark sticker rm <行号|关键词>`：删收藏
