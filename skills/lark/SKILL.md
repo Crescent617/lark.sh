@@ -82,12 +82,12 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 ## sticker 规则
 
 - **一律走 `lark sticker` 系列命令，file_key 全程不过手**：LLM 的"复制"是逐 token 默写，长随机串必出缝合事故。
-  - `lark sticker send <oc_|om_> <关键词|行号> [--thread]`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号。`--thread` **仅 om_ 目标有效**——要进当前 thread，目标取 thread 里任意一条消息的 `om_` 加 `--thread`；`oc_` 直发永远只落主流（带 `--thread` 会直接报错）
+  - `lark sticker send <oc_|om_|omt_> <关键词|行号> [--thread]`：按描述/场景关键词发；多匹配列候选（exit 3），换准词或给行号。落点看目标前缀：`oc_`=群主流；`om_`=回复该消息（默认回主流，`--thread` 进话题）；`omt_`=直发进该话题——**进当前 thread 就用信封里的 thread id 当目标，一句话的事**
   - `lark sticker list [关键词]`：看收藏（行号 + 描述 + 场景，无 key）
   - `lark sticker add <om_> '<描述>' '<场景>'`：收藏消息里的表情（自动取 key、去重、存图；先看图写法见 `im.md`）
   - `lark sticker rm <行号|关键词>`：删收藏
 - 存储在全局目录 `~/.yomi/state/lark/stickers/<appId>/`（yomi state dir 下按 bot appId 分目录，`LARK_STICKER_DIR` 可覆盖）；索引里没合适的就直说没有，**不要编**。
-- 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个；进当前 thread 的正确姿势 = 目标用 thread 里某条消息的 `om_` + `--thread`（om_ 默认只回主流）；⚠️ 标记者只对熟人用。
+- 闲聊/玩梗可主动发，正式场合不发；用户点名随意发；一次一个；进当前 thread 直接拿信封 `thread:` 的 `omt_` 当目标发（`--thread` 只留给 `om_` 目标用）；⚠️ 标记者只对熟人用。
 
 ## 跨 chat 提问
 

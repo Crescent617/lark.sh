@@ -74,7 +74,7 @@ lark im sticker om_x <file_key> --thread  # 进话题
 lark im sticker oc_x <file_key>           # 直接发到群
 ```
 
-> 落点语义全命令统一：回复类（reply/sticker 接 `om_`）**默认回主消息流，要进话题加 `--thread`**；`oc_` 直发群无话题概念。
+> 落点语义全命令统一：回复类（reply/sticker 接 `om_`）**默认回主消息流，要进话题加 `--thread`**；`oc_` 直发群主流；`omt_` 直发进该话题（sticker 类支持，内部取 thread 根消息作锚点）。
 
 收藏夹 file_key 表见 `stickers.md`（本地文件，可能尚不存在——不存在说明收藏夹为空）；发送时机规则见 `SKILL.md` 的「sticker 规则」。
 
