@@ -193,7 +193,9 @@ def st_pick(idx, sel, cmd="sticker"):
 
 
 def st_post(target, key, extras, capture=True):
-    """底层 sticker 发送：om_=回复该消息（默认回主流，--thread 进话题），oc_=直发群。"""
+    """底层 sticker 发送：om_=回复该消息（默认回主流，--thread 进话题），oc_=直发群（无话题概念）。"""
+    if target.startswith("oc_") and extras and "--thread" in extras:
+        die("sticker: --thread 仅 om_ 目标有效（oc_ 直发只落主流；要进话题就 reply thread 里某条 om_ 加 --thread）")
     content = json.dumps({"file_key": key}, separators=(",", ":"))
     if target.startswith("om_"):
         in_thread = False
@@ -224,7 +226,7 @@ IM:
   lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（N 上限 50，折叠同 read）
   lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
   lark im reply <om_> <text|@file|->       回复消息（--thread 进话题；--markdown 富文本；--image/--file 等媒体同 send）
-  lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息默认回主流，oc_=直发群；--thread 进话题）
+  lark im sticker <om_|oc_> <file_key>     发表情（om_=回复该消息默认回主流，oc_=直发群；--thread 进话题，仅 om_ 有效）
   lark im dl <om_> [dir] [--file-key K] [--type file]  下载消息附件/图片
   lark im mget <om_>[,<om_>...]            按 id 批量取消息
   lark im chats                            列出 bot 所在群
@@ -258,7 +260,7 @@ BOARD:
   lark board update [args...]              更新画板（--whiteboard-token 必填；--source 支持 @file/-；--input_format raw|plantuml|mermaid|svg）
 
 STICKER（收藏夹全局存储，按 appId 分目录；file_key 全程不出脚本，调用方只递 关键词/行号/om_）:
-  lark sticker send <oc_|om_> <关键词|行号> [--thread]   按描述/场景关键词或索引行号发表情（多匹配列候选，exit 3）
+  lark sticker send <oc_|om_> <关键词|行号> [--thread]   按描述/场景关键词或索引行号发表情（多匹配列候选，exit 3；--thread 仅 om_ 目标有效）
   lark sticker list [关键词]               列收藏（行号 + 描述 + 场景，不含 key）
   lark sticker add <om_> '<描述>' '<场景>'  收藏消息里的表情（自动取 key、去重、存图到收藏目录）
   lark sticker rm <行号|关键词>              删收藏（关键词须唯一匹配）
