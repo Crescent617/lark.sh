@@ -2,6 +2,8 @@
 *.bin
 *.log
 .DS_Store
+__pycache__/
+*.pyc
 
 # 下载临时目录（sticker/附件下载的默认落点）
 /dl/
