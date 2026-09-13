@@ -698,8 +698,8 @@ def sticker_main(argv):
             f.write(f"| `{key}` | {desc.replace('|', '、')} | {scene.replace('|', '、')} |\n")
         r = subprocess.run(["lark-cli", "im", "+messages-resources-download",
                             "--message-id", om, "--file-key", key, "--type", "file",
-                            "--output", str(idx.parent / "stickers" / key), *A()],
-                           capture_output=True)
+                            "--output", key, *A()],
+                           capture_output=True, cwd=str(idx.parent / "stickers"))
         if r.returncode != 0:
             print(f"{PROG}: 警告：表情图片下载失败（索引已入）{om}", file=sys.stderr)
         print(f"{PROG}: 已收藏：{desc} — {scene}")
