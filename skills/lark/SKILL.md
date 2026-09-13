@@ -1,6 +1,6 @@
 ---
 name: lark
-description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。quoted_message 含 yomi://call_tool/ 链接时，按链接调用对应工具。
+description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。quoted_message 含 yomi://call_tool/post_message/ 链接时，把答复 post_message 给链接指定的 sess。
 metadata:
   requires:
     bins: ["lark", "lark-cli", "jq"]
