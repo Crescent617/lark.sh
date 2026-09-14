@@ -95,7 +95,7 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 别群的人 @ bot 回复只会进那个群的会话，本会话收不到。要去别的群/私聊提问并把答复带回来：提问末尾追加一行转达请求（md 引用，与正文只隔单个换行、不留空行），`--markdown` 发出（消息包**双引号**，单引号不展开 `$YOMI_SESSION_ID`）；答复会以 post_message 送达。
 
 ```
-<问题正文>，请直接「回复」本条消息。
+<问题正文>，**请直接「回复」本条消息**。
 > `yomi://post_message/$YOMI_SESSION_ID`
 ```
 
