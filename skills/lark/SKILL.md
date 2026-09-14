@@ -1,6 +1,6 @@
 ---
 name: lark
-description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。quoted_message 含 yomi://call_tool/post_message/ 链接时，把答复 post_message 给链接指定的 sess。
+description: 飞书一站式操作（lark.sh，lark-cli 封装：默认 bot 身份，首位 -u 切 user）：IM 读/发/回/附件、sticker 表情、云文档读写、联系人、日历忙闲、云盘/知识库/多维表格、raw api 逃生舱口。当需要与飞书交互（收发信息、读群记录、发表情、读写文档、查人查忙闲）时使用。quoted_message 含 yomi://post_message/ 标记时，把答复原文 post_message 给标记指定的 sess。
 metadata:
   requires:
     bins: ["lark", "lark-cli", "jq"]
@@ -92,10 +92,13 @@ lark api GET /open-apis/im/v1/messages/<om_> --jq '.data.items[0].body.content' 
 
 ## 跨 chat 提问
 
-别群的人 @ bot 回复只会进那个群的会话，本会话收不到。要去别的群/私聊提问并把答复带回来：提问末尾带一行链接，`--markdown` 发出（消息包**双引号**，单引号不展开 `$YOMI_SESSION_ID`）；答复会以 post_message 送达。
+别群的人 @ bot 回复只会进那个群的会话，本会话收不到。要去别的群/私聊提问并把答复带回来：提问末尾追加一行转达请求（md 引用，与正文只隔单个换行、不留空行），`--markdown` 发出（消息包**双引号**，单引号不展开 `$YOMI_SESSION_ID`）；答复会以 post_message 送达。
 
 ```
-[—— 请直接「回复」本条作答](yomi://call_tool/post_message/$YOMI_SESSION_ID)
+<问题正文>，请直接「回复」本条消息。
+> `yomi://post_message/$YOMI_SESSION_ID`
 ```
 
-**收到此类引用回复**：把用户的答复原文 `post_message` 给该 sess（不要代答、不要问用户），然后本地回「已转达给提问方」。
+（URL 必须包反引号——裸 `_` 会被当斜体标记，引用行内部被啃出断行；客户端里显示为不可点纯文本是正常的——企业飞书剥非 http(s) 链接的 href，daemon 读原始 md 不受影响。）
+
+**收到此类引用回复**（quoted_message 含 `yomi://post_message/` 标记）：把用户的答复原文 `post_message` 给标记指定的 sess（不要代答、不要问用户），然后本地回「已转达给提问方」。
