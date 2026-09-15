@@ -10,8 +10,10 @@
 # 用法：lark [-u] <category> <cmd> [args...]   详见 -h 或 skills/lark/SKILL.md
 
 import argparse
+import html as html_lib
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -488,6 +490,19 @@ def im_main(argv):
 
 # ===== doc =====
 
+def ensure_doc_title(body):
+    """缺 <title> 时从首个 <h1> 派生，避免产出 Untitled 文档；已有 title 或无 h1 则原样。"""
+    if re.search(r"<title[ >]", body):
+        return body
+    m = re.search(r"<h1[^>]*>(.*?)</h1>", body, re.S)
+    if not m:
+        return body
+    title = re.sub(r"<[^>]+>", "", m.group(1)).strip()
+    if not title:
+        return body
+    return f"<title>{html_lib.escape(html_lib.unescape(title))}</title>" + body
+
+
 def auto_subscribe(tok, file_type, out):
     """建完自动订阅（评论/更新通知回流 bot）；订阅失败不拖垮建单。"""
     if not tok:
@@ -520,7 +535,7 @@ def doc_main(argv):
         p = argparse.ArgumentParser(prog="lark doc create")
         p.add_argument("content", nargs="?")
         a, ex = p.parse_known_args(rest)
-        body = load_text(need(a.content, "内容（html、@file 或 -）"))
+        body = ensure_doc_title(load_text(need(a.content, "内容（html、@file 或 -）")))
         r = subprocess.run(["lark-cli", "docs", "+create", "--content", body, *A(), *ex],
                            stdout=subprocess.PIPE, text=True)
         print(r.stdout.rstrip("\n"))

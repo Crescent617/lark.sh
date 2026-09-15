@@ -41,7 +41,7 @@ lark im find '关键词' # 按名搜群
 
 # 文档
 lark doc read <url|token> # 读文档；-k '词' 只取相关片段
-lark doc create '<h1>标题</h1><p>正文</p>' # 新建文档（HTML 片段；自动订阅）
+lark doc create '<h1>标题</h1><p>正文</p>' # 新建文档（HTML 片段；自动订阅；无 <title> 时取首个 <h1> 作标题）
 lark doc append <doc> @body.html # 文末追加
 lark doc replace <doc> <block_id> '<p>新</p>' # 替换指定块
 
