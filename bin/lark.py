@@ -332,7 +332,7 @@ def im_thread(a, extras):
 
 
 MSGTYPES = ("text", "markdown", "image", "file", "video", "audio")
-MEDIA_FLAGS = ("--markdown", "--image", "--file", "--video", "--audio")
+MEDIA_FLAGS = ("--markdown", "--image", "--file", "--video", "--audio", "--text")
 
 
 def msg_body(msgtype, body, cmd):
@@ -350,7 +350,7 @@ def im_send(rest):
     # 导致 flag 后的正文被挤进 extras（argparse 经典坑）。
     target = need(rest[0] if rest else None, "oc_|ou_")
     rest = rest[1:]
-    msgtype = "text"
+    msgtype = "markdown"  # 默认 markdown（华儒 09-23 定），--text 切回纯文本
     if rest and rest[0] in MEDIA_FLAGS:
         msgtype = rest[0][2:]
         rest = rest[1:]
@@ -370,7 +370,7 @@ def im_reply(rest):
     # 同 bash：body 前可叠任意个 --thread/媒体 flag（msgtype 后者覆盖前者）。
     mid = need(rest[0] if rest else None, "om_")
     rest = rest[1:]
-    pre, msgtype = [], "text"
+    pre, msgtype = [], "markdown"  # 默认 markdown（华儒 09-23 定），--text 切回纯文本
     while rest:
         if rest[0] == "--thread":
             pre.append("--reply-in-thread")
