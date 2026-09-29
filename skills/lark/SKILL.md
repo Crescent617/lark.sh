@@ -27,10 +27,10 @@ lark im read <oc_> -n 20 # 读群消息，最新在前；--asc 最老在前；--
 lark im read <oc_> --start "$s" --end "$e" --asc --page-all --page-limit 50 # 时间窗拉全量（ISO 8601 带冒号时区 +08:00）
 lark im read <oc_> --page-token '<tok>' # 翻页：带上上页的 page_token
 lark im thread <omt_> -n 20 # 读话题消息（--verbose 同 read）
-lark im send <oc_> '文本' # 发群消息；换 ou_ 发私信
+lark im send <oc_> '文本' # 发群消息；换 ou_ 发私信；换 omt_ 直发进话题（无 --thread flag，别用）
 lark im send <oc_> --markdown '**粗体**' # 发 markdown
 lark im send <oc_> --image ./图.png # 发图片（路径/URL/img_key）
-lark im send <oc_> --file ./报告.pdf # 发文件（路径/URL/file_key；--video/--audio 同理）
+lark im send <omt_xxx> --file ./报告.pdf # 发文件进话题（话题=omt_ 开头；oc_ 发主流；路径相对 cwd，绝对路径被拒）
 lark im send <oc_> '<at user_id="ou_x">名字</at> 看下' # @人（user_id 必须带引号，否则静默不解析）
 lark im reply <om_> '文本' # 回复；--thread 进话题；--markdown 发富文本
 lark im sticker <om_> <file_key> # 回复发表情（落点跟随该消息）；oc_ 直发主流，omt_ 直发话题

@@ -53,6 +53,7 @@ done
 ```bash
 lark im send oc_x '文本'                  # 群
 lark im send ou_x '文本'                  # 私信
+lark im send omt_x '文本'                 # 直发进话题（内部取话题首条作锚点，reply_in_thread）
 lark im send oc_x --markdown '**粗体**'   # markdown
 lark im send oc_x --image ./图.png         # 图片（cwd 相对路径/URL/img_key；绝对路径与 .. 被拒）
 lark im send oc_x --file ./报告.pdf        # 文件（路径/URL/file_key；--video/--audio 同模式）
@@ -74,7 +75,7 @@ lark im sticker omt_x <file_key>          # 直发进话题
 lark im sticker oc_x <file_key>           # 直接发到群
 ```
 
-> 落点语义全命令统一：回复类（reply/sticker 接 `om_`）**跟着被回复的消息走**——主流的 `om_` 回主流，话题里的 `om_` 留在该话题（飞书原生行为，`reply_in_thread=false` 也拽不出来）；reply 要显式进话题加 `--thread`，sticker 要进话题直接用 `omt_` 目标（内部取 thread 根消息作锚点）；`oc_` 直发群主流。
+> 落点语义全命令统一：回复类（reply/sticker 接 `om_`）**跟着被回复的消息走**——主流的 `om_` 回主流，话题里的 `om_` 留在该话题（飞书原生行为，`reply_in_thread=false` 也拽不出来）；reply 要显式进话题加 `--thread`，sticker 要进话题直接用 `omt_` 目标（内部取 thread 根消息作锚点）；send 同样认 `omt_` 目标直发话题；`oc_` 直发群主流。send **没有** `--thread` flag（底层 lark-cli 会直接报错，且报错 exit code 为 0 像成功——别用）。
 
 收藏夹 file_key 表见 `stickers.md`（本地文件，可能尚不存在——不存在说明收藏夹为空）；发送时机规则见 `SKILL.md` 的「sticker 规则」。
 

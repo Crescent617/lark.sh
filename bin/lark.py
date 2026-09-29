@@ -194,21 +194,28 @@ def st_pick(idx, sel, cmd="sticker"):
     return hits[0]
 
 
+def thread_anchor(tid):
+    """话题直发的公共前置：话题没有直发 API，取 thread 首条消息（asc 第一条=根）作锚点。
+
+    返回根消息 id；空话题直接 die。"""
+    page = cli_json("api", "GET", "/open-apis/im/v1/messages",
+                    "--params", json.dumps({"container_id_type": "thread", "container_id": tid,
+                                            "page_size": 1, "sort_type": "ByCreateTimeAsc"},
+                                           separators=(",", ":")), *A())
+    items = (page.get("data") or {}).get("items") or []
+    anchor = items[0].get("message_id") if items else None
+    if not anchor:
+        die(f"话题 {tid} 里取不到锚点消息")
+    return anchor
+
+
 def st_post(target, key, extras, capture=True):
     """底层 sticker 发送：oc_=直发群主流；om_=回复该消息（落点跟随该消息）；omt_=直发进该话题。"""
     if not target.startswith(("om_", "oc_", "omt_")):
         die(f"sticker: target 必须是 oc_（群主流）/ om_（回复）/ omt_（话题）：{target}")
     content = json.dumps({"file_key": key}, separators=(",", ":"))
     if target.startswith("omt_"):
-        # 话题没有直发 API：取 thread 首条消息（asc 第一条=根）作锚点，reply_in_thread 落进话题
-        page = cli_json("api", "GET", "/open-apis/im/v1/messages",
-                        "--params", json.dumps({"container_id_type": "thread", "container_id": target,
-                                                "page_size": 1, "sort_type": "ByCreateTimeAsc"},
-                                               separators=(",", ":")), *A())
-        items = (page.get("data") or {}).get("items") or []
-        anchor = items[0].get("message_id") if items else None
-        if not anchor:
-            die(f"sticker: 话题 {target} 里取不到锚点消息")
+        anchor = thread_anchor(target)
         data = json.dumps({"content": content, "msg_type": "sticker",
                            "reply_in_thread": True}, separators=(",", ":"))
         argv = ["api", "POST", f"/open-apis/im/v1/messages/{anchor}/reply",
@@ -234,7 +241,7 @@ USAGE = """lark — lark-cli 的轻封装（环境变量内置；默认 bot 身�
 IM:
   lark im read <oc_> [-n N] [--asc] [--verbose] [--start <ts> --end <ts>] [--page-all]  读群消息（默认 desc 最近 20 条，N 上限 50；--start/--end 时间窗 ISO 8601；--page-all 拉全量；卡片折叠面板默认剥离，--verbose 保留）
   lark im thread <omt_|om_> [-n N] [--verbose]   读话题消息（N 上限 50，折叠同 read）
-  lark im send <oc_|ou_> <text|@file|->    发消息（oc_=群 ou_=私信；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
+  lark im send <oc_|ou_|omt_> <text|@file|->    发消息（oc_=群 ou_=私信 omt_=直发进话题；--markdown 切 markdown；--image/--file/--video/--audio <路径> 发媒体文件）
   lark im reply <om_> <text|@file|->       回复消息（--thread 进话题；--markdown 富文本；--image/--file 等媒体同 send）
   lark im sticker <om_|oc_|omt_> <file_key> 发表情（oc_=群主流；om_=回复该消息（落点跟随该消息）；omt_=直发进话题）
   lark im dl <om_> [dir] [--file-key K] [--type file]  下载消息附件/图片
@@ -348,7 +355,7 @@ def im_send(rest):
     # 手搓解析（与 bash 版语义一致）：msgtype flag 只认 target 后第一位。
     # 不用 argparse 的原因：nargs='?' 位置参数遇可选 flag 会提前"吃饱"，
     # 导致 flag 后的正文被挤进 extras（argparse 经典坑）。
-    target = need(rest[0] if rest else None, "oc_|ou_")
+    target = need(rest[0] if rest else None, "oc_|ou_|omt_")
     rest = rest[1:]
     msgtype = "markdown"  # 默认 markdown（华儒 09-23 定），--text 切回纯文本
     if rest and rest[0] in MEDIA_FLAGS:
@@ -362,8 +369,10 @@ def im_send(rest):
     elif target.startswith("ou_"):
         exec_cli("im", "+messages-send", "--user-id", target,
                  f"--{msgtype}", body, *A(), *extras)
-    else:
-        die(f"im send: target 必须是 oc_（群）或 ou_（私信）：{target}")
+    else:  # omt_：直发进话题（取话题首条作锚点，reply_in_thread）
+        anchor = thread_anchor(target)
+        exec_cli("im", "+messages-reply", "--message-id", anchor,
+                 f"--{msgtype}", body, *A(), "--reply-in-thread", *extras)
 
 
 def im_reply(rest):
