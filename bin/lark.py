@@ -46,11 +46,23 @@ def load_text(s):
 
 
 def exec_cli(*args):
-    """等价 bash 的 exec lark-cli：替换进程，退出码（含 10 高危门禁）原样保留。"""
+    """跑 lark-cli；JSON 协议错误（ok:false 但进程 exit 0）转成非零退出。
+
+    出错不能静默：lark-cli 对参数校验/上传失败类错误回 {"ok": false}
+    且 exit 0，调用方（脚本/agent）只看退出码会误判成功。这里统一兜底：
+    输出照常透传，但 ok:false 一律 exit 1（lark-cli 自身非零退出码
+    原样保留，含 10 高危门禁）。"""
+    p = subprocess.run(["lark-cli", *args], capture_output=True, text=True)
+    sys.stdout.write(p.stdout)
+    sys.stderr.write(p.stderr)
+    if p.returncode != 0:
+        sys.exit(p.returncode)
     try:
-        os.execvp("lark-cli", ["lark-cli", *args])
-    except FileNotFoundError:
-        die("lark-cli 不在 PATH（见 README 安装）", 127)
+        ok = json.loads(p.stdout).get("ok")
+    except (ValueError, AttributeError):
+        ok = None
+    if ok is False:
+        sys.exit(1)
 
 
 def cli_run(*args, check=True):
@@ -363,6 +375,8 @@ def im_send(rest):
         rest = rest[1:]
     body = msg_body(msgtype, rest[0] if rest else None, "im send")
     extras = rest[1:] if rest else []
+    if "--thread" in extras:
+        die("im send 没有 --thread flag；直发话题用 omt_ 目标：lark im send omt_xxx <内容>")
     if target.startswith("oc_"):
         exec_cli("im", "+messages-send", "--chat-id", target,
                  f"--{msgtype}", body, *A(), *extras)
